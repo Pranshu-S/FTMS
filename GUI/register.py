@@ -18,24 +18,17 @@ class Register:
         # Login Frames
         Frame_login=Frame(self.root, bg="white")
         Frame_login.place(x=170, y=100, height=500, width=700)
-        
+        var = IntVar()
+
         title = Label(Frame_login, text="Register on", font=("Sans Serif",20),fg="black", bg="white").place(x=170, y=30)
         title_2 = Label(Frame_login, text="FTMS ", font=("Sans Serif",20, "bold"),fg="#fc6203", bg="white").place(x=330, y=30)
         desc = Label(Frame_login, text="Farmers Transaction Management System ", font=("Sans Serif",10),fg="grey", bg="white").place(x=115, y=70)
 
-        lbl_user = Label(Frame_login,text="Username",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=70, y=110)
-        self.txt_user = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
-        self.txt_user.place(x=70,y=140, width=350, height=35)
+        Farmer = Radiobutton(Frame_login, text="Farmer",variable=var, value=1, bg="white",fg="#fc6203",bd=0, font=("Sans Serif",10)).place(x=100, y= 260)
+        
+        Buyer=Radiobutton(Frame_login, text="Buyer",variable=var, value=2,bg="white",fg="#fc6203", bd=0, font=("Sans Serif",10)).place(x=280, y= 260)
 
-
-        lbl_pass = Label(Frame_login,text="Password",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=70, y=190)
-        self.txt_pass = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
-        self.txt_pass.place(x=70,y=220, width=350, height=35)
-
-        forget=Button(Frame_login, text="Forget Password?",bg="white",fg="#fc6203",bd=0, font=("Sans Serif",10)).place(x=100, y= 260)
-        new_user=Button(Frame_login, text="Register",bg="white",fg="#fc6203", bd=0, font=("Sans Serif",10)).place(x=280, y= 260)
-
-        Login_Button=Button(self.root, text="Login",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20)).place(x=640, y= 420)
+        Next_Button =Button(self.root, text="Next",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20)).place(x=640, y= 420)
 
 
 # Create Tkinter object
@@ -45,3 +38,8 @@ root = Tk()
 obj = Register(root)
 
 root.mainloop()
+
+
+# Register - Ask if farmer/buyer
+# Farmer - USERID, PAss, name, location, contact number,  (if farmer/buyer), Which crops (checklist)
+# Buyer - USERID, PAss, name, location, contact number,  (if farmer/buyer),
