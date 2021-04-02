@@ -1,5 +1,6 @@
 # Import Tkinter Module
 from tkinter import *
+import sqlite3
 from PIL import ImageTk
 class Login:
     def __init__(self,root):
@@ -110,9 +111,22 @@ class Register_F:
         lbl_crop = Label(Frame_login,text="Crop",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=400, y=190)
         self.txt_crop = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
         self.txt_crop.place(x=400,y=220, width=250, height=35)
-
-
-        Next_Button =Button(self.root, text="Next",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20)).place(x=640, y= 420)
+        def submit():
+            conn=sqlite3.connect('FTMS.db')
+            crsr=conn.cursor()
+            crsr.execute("INSERT INTO FARMER VALUES(:USER_ID,:PWD, :NAME, :LOC ,:CONTACT)",
+                {
+                    'USER_ID':self.txt_user.get(),
+                    'PWD':self.txt_pass.get(),
+                    'NAME':self.txt_name.get(),
+                    'LOC':self.txt_location.get(),
+                    'CONTACT':self.txt_contact.get()
+                })
+            conn.commit()
+            conn.close()
+        
+        Next_Button =Button(self.root, text="Next",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20),command = submit).place(x=640, y= 420)
+        
 class Register_B:
     def __init__(self,root):
         self.root = root
