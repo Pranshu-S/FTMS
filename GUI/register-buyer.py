@@ -35,17 +35,17 @@ class Register:
         self.txt_conf_pass = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
         self.txt_conf_pass.place(x=70,y=290, width=250, height=35)
 
-        lbl_name = Label(Frame_login,text="Name",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=70, y=340)
-        self.txt_name = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
-        self.txt_name.place(x=70,y=360, width=250, height=35)
-
-        lbl_location = Label(Frame_login,text="Location",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=70, y=400)
+        lbl_location = Label(Frame_login,text="Location",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=400, y=260)
         self.txt_location = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
-        self.txt_location.place(x=70,y=430, width=250, height=35)
+        self.txt_location.place(x=400,y=290, width=250, height=35)
 
-        lbl_contact = Label(Frame_login,text="Contact Number",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=400, y=110)
+        lbl_name = Label(Frame_login,text="Name",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=400, y=110)
+        self.txt_head = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
+        self.txt_head.place(x=400,y=140, width=250, height=35)
+
+        lbl_contact = Label(Frame_login,text="Contact Number",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=400, y=190)
         self.txt_contact = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
-        self.txt_contact.place(x=400,y=140, width=250, height=35)
+        self.txt_contact.place(x=400,y=220, width=250, height=35)
 
         Next_Button =Button(self.root, text="Next",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20)).place(x=640, y= 420)
 
