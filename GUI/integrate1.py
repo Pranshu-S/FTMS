@@ -2,6 +2,7 @@
 from tkinter import *
 import sqlite3
 from PIL import ImageTk
+
 class Login:
     def __init__(self,root):
         self.root = root
@@ -25,41 +26,45 @@ class Login:
         self.txt_user = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
         self.txt_user.place(x=70,y=140, width=350, height=35)
 
-
         lbl_pass = Label(Frame_login,text="Password",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=70, y=190)
-        self.txt_pass = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
+        self.txt_pass = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0", show="*")
         self.txt_pass.place(x=70,y=220, width=350, height=35)
 
-        forget=Button(Frame_login, text="Forget Password?",bg="white",fg="#fc6203",bd=0, font=("Sans Serif",10)).place(x=100, y= 260)
-        new_user=Button(Frame_login, text="Register",bg="white",fg="#fc6203", bd=0, font=("Sans Serif",10),command=open).place(x=280, y= 260)
-        def check():
-            conn=sqlite3.connect('FTMS.db')
-            crsr=conn.cursor()
-            crsr.execute("SELECT * FROM FARMER WHERE F_ID=:USER_ID",
+        new_user=Button(self.root, text="Register",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20),command=self.open).place(x=550, y= 420)
+        Login_Button=Button(self.root, text="Login",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20),command=self.check).place(x=750, y= 420)
+
+    def check(self):
+        conn=sqlite3.connect('FTMS.db')
+        crsr=conn.cursor()
+        crsr.execute("SELECT * FROM FARMER WHERE F_ID=:USER_ID",
+        {
+            'USER_ID':self.txt_user.get()
+        })
+        c=crsr.fetchall()
+        if len(c) != 0:
+            if c[0][1]==self.txt_pass.get():
+                top2=Toplevel()
+                obj3=FPortal(top2)
+        else:
+            crsr.execute("SELECT * FROM BUYER WHERE B_ID=:USER_ID",
             {
-                'USER_ID':self.txt_user.get()
+            'USER_ID':self.txt_user.get()
             })
             c=crsr.fetchall()
-            if len(c) != 0:
+            if c != 0:
                 if c[0][1]==self.txt_pass.get():
                     top2=Toplevel()
-                    obj3=FPortal(top2)
-            else:
-                crsr.execute("SELECT * FROM BUYER WHERE B_ID=:USER_ID",
-                {
-                'USER_ID':self.txt_user.get()
-                })
-                c=crsr.fetchall()
-                if c != 0:
-                    if c[0][1]==self.txt_pass.get():
-                        top2=Toplevel()
-                        obj3=BPortal(top2)
+                    obj3=BPortal(top2)
 
 
-            conn.commit()
-            conn.close()
+        conn.commit()
+        conn.close()
 
-        Login_Button=Button(self.root, text="Login",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20),command=check).place(x=640, y= 420)
+    def open(self):
+        Register_window=Register(self.root)
+        root.mainloop()
+
+        
 class Register:
     def __init__(self,root):
         self.root = root
@@ -78,20 +83,20 @@ class Register:
 
         title = Label(Frame_register, text="Register on", font=("Sans Serif",20),fg="black", bg="white").place(x=170, y=30)
         title_2 = Label(Frame_register, text="FTMS ", font=("Sans Serif",20, "bold"),fg="#fc6203", bg="white").place(x=330, y=30)
-        desc = Label(Frame_register, text="Farmers Transaction Management System ", font=("Sans Serif",10),fg="grey", bg="white").place(x=115, y=70)
+        desc = Label(Frame_register, text="Farmers Transaction Management System ", font=("Sans Serif",10),fg="grey", bg="white").place(x=150, y=70)
 
-        Farmer = Radiobutton(Frame_register, text="Farmer",variable=var, value=1, bg="white",fg="#fc6203",bd=0, font=("Sans Serif",10)).place(x=100, y= 260)
+        Farmer = Radiobutton(Frame_register, text="Farmer",variable=var, value=1, bg="white",activebackground="#fc6203", height= 6, width=10, bd=0, font=("Sans Serif",20)).place(x=100, y= 170)
         
-        Buyer=Radiobutton(Frame_register, text="Buyer",variable=var, value=2,bg="white",fg="#fc6203", bd=0, font=("Sans Serif",10)).place(x=280, y= 260)
+        Buyer=Radiobutton(Frame_register, text="Buyer",variable=var, value=2,bg="white",activebackground="#fc6203", bd=0, height= 6, width=10, font=("Sans Serif",20)).place(x=400, y= 170)
 
-        Next_Button =Button(self.root, text="Next",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20),command = lambda: clicked(var.get())).place(x=640, y= 420)
-        def clicked(value):
-            global top
-            top=Toplevel()
-            if value==1:
-                obj2=Register_F(top)
-            else:
-                obj2=Register_B(top)
+        Next_Button =Button(self.root, text="Next",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20),command = lambda: self.clicked(var.get())).place(x=640, y= 500)
+        
+    def clicked(self, value):
+        if value==1:
+            Farmer_Register=Register_F(self.root)
+        else:
+            Buyer_Register=Register_B(self.root)
+
 class Register_F:
     def __init__(self,root):
         self.root = root
@@ -107,9 +112,9 @@ class Register_F:
         Frame_login=Frame(self.root, bg="white")
         Frame_login.place(x=170, y=100, height=500, width=700)
 
-        title = Label(Frame_login, text="Register on", font=("Sans Serif",20),fg="black", bg="white").place(x=170, y=30)
-        title_2 = Label(Frame_login, text="FTMS ", font=("Sans Serif",20, "bold"),fg="#fc6203", bg="white").place(x=330, y=30)
-        desc = Label(Frame_login, text="Farmers Transaction Management System ", font=("Sans Serif",10),fg="grey", bg="white").place(x=115, y=70)
+        title = Label(Frame_login, text="FARMER", font=("Sans Serif",20),fg="black", bg="white").place(x=180, y=30)
+        title_2 = Label(Frame_login, text="REGISTERATION ", font=("Sans Serif",20, "bold"),fg="#fc6203", bg="white").place(x=320, y=30)
+        desc = Label(Frame_login, text="Farmers Transaction Management System ", font=("Sans Serif",10),fg="grey", bg="white").place(x=200, y=70)
         
         lbl_user = Label(Frame_login,text="Username",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=70, y=110)
         self.txt_user = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
@@ -265,10 +270,9 @@ class BPortal:
 
             my_quotations = Button(Frame_login,text="My Quotations",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0).place(x=70, y=330)
 
-def open():
-    global top1
-    top1=Toplevel()
-    obj1=Register(top1)
+
+    
+global root
 root=Tk()
 obj = Login(root)
 root.mainloop()
