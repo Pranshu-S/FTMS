@@ -113,7 +113,7 @@ class Register_F:
         Frame_login.place(x=170, y=100, height=500, width=700)
 
         title = Label(Frame_login, text="FARMER", font=("Sans Serif",20),fg="black", bg="white").place(x=180, y=30)
-        title_2 = Label(Frame_login, text="REGISTERATION ", font=("Sans Serif",20, "bold"),fg="#fc6203", bg="white").place(x=320, y=30)
+        title_2 = Label(Frame_login, text="REGISTERATION ", font=("Sans Serif",20, "bold"),fg="#fc6203", bg="white").place(x=310, y=30)
         desc = Label(Frame_login, text="Farmers Transaction Management System ", font=("Sans Serif",10),fg="grey", bg="white").place(x=200, y=70)
         
         lbl_user = Label(Frame_login,text="Username",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=70, y=110)
@@ -121,46 +121,47 @@ class Register_F:
         self.txt_user.place(x=70,y=140, width=250, height=35)
 
         lbl_pass = Label(Frame_login,text="Password",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=70, y=190)
-        self.txt_pass = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
+        self.txt_pass = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0", show="*")
         self.txt_pass.place(x=70,y=220, width=250, height=35)
 
-        conf_lbl_pass = Label(Frame_login,text="Confirm Password",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=70, y=260)
-        self.txt_conf_pass = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
-        self.txt_conf_pass.place(x=70,y=290, width=250, height=35)
+        conf_lbl_pass = Label(Frame_login,text="Confirm Password",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=70, y=270)
+        self.txt_conf_pass = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0",show="*")
+        self.txt_conf_pass.place(x=70,y=300, width=250, height=35)
 
-        lbl_name = Label(Frame_login,text="Name",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=70, y=340)
-        self.txt_name = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
-        self.txt_name.place(x=70,y=360, width=250, height=35)
-
-        lbl_location = Label(Frame_login,text="Location",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=70, y=400)
-        self.txt_location = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
-        self.txt_location.place(x=70,y=430, width=250, height=35)
-
-        lbl_contact = Label(Frame_login,text="Contact Number",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=400, y=110)
+        lbl_contact = Label(Frame_login,text="Contact Number",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=70, y=350)
         self.txt_contact = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
-        self.txt_contact.place(x=400,y=140, width=250, height=35)
+        self.txt_contact.place(x=70,y=380, width=250, height=35)
+
+        lbl_location = Label(Frame_login,text="Location",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=400, y=270)
+        self.txt_location = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
+        self.txt_location.place(x=400,y=300, width=250, height=35)
+
+        lbl_name = Label(Frame_login,text="Name",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=400, y=110)
+        self.txt_name = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
+        self.txt_name.place(x=400,y=140, width=250, height=35)
 
         lbl_crop = Label(Frame_login,text="Crop",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=400, y=190)
         self.txt_crop = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
         self.txt_crop.place(x=400,y=220, width=250, height=35)
-        def submit():
-            conn=sqlite3.connect('FTMS.db')
-            crsr=conn.cursor()
-            crsr.execute("INSERT INTO FARMER VALUES(:USER_ID,:PWD, :NAME, :LOC ,:CONTACT)",
-                {
-                    'USER_ID':self.txt_user.get(),
-                    'PWD':self.txt_pass.get(),
-                    'NAME':self.txt_name.get(),
-                    'LOC':self.txt_location.get(),
-                    'CONTACT':self.txt_contact.get()
-                })
-            conn.commit()
-            conn.close()
-            top.destroy()
-            top1.destroy()
         
-        Next_Button =Button(self.root, text="Register",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20),command = submit).place(x=640, y= 420)
-        
+        Next_Button =Button(self.root, text="Register",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20),command = self.submit).place(x=640, y= 460)
+    
+    def submit(self):
+        conn=sqlite3.connect('FTMS.db')
+        crsr=conn.cursor()
+        crsr.execute("INSERT INTO FARMER VALUES(:USER_ID,:PWD, :NAME, :LOC ,:CONTACT)",
+            {
+                'USER_ID':self.txt_user.get(),
+                'PWD':self.txt_pass.get(),
+                'NAME':self.txt_name.get(),
+                'LOC':self.txt_location.get(),
+                'CONTACT':self.txt_contact.get()
+            })
+        conn.commit()
+        conn.close()
+        farmer_portal = FPortal(self.root)
+
+
 class Register_B:
     def __init__(self,root):
         self.root = root
