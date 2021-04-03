@@ -3,6 +3,8 @@ from tkinter import *
 import sqlite3
 import datetime
 from PIL import ImageTk
+from tkinter import ttk
+
 ID='a'
 
 class Login:
@@ -417,8 +419,20 @@ class Show_Q:
         title_2 = Label(Frame_login, text="FTMS ", font=("Sans Serif",20, "bold"),fg="#fc6203", bg="white").place(x=330, y=30)
         desc = Label(Frame_login, text="Farmers Transaction Management System ", font=("Sans Serif",10),fg="grey", bg="white").place(x=115, y=70)
         
-        self.all_quotes = Listbox(Frame_login,bg="white",fg="#fc6203", bd=0,height=14,width=100)
+        self.all_quotes = ttk.Treeview(Frame_login)
+        self.all_quotes["columns"]=("Crop","Quote", "Timestamp")
+        self.all_quotes.column("#0", width=150, minwidth=150)
+        self.all_quotes.column("Crop", width=150, minwidth=150)
+        self.all_quotes.column("Quote", width=150, minwidth=150)
+        self.all_quotes.column("Timestamp", width=340, minwidth=340)
         self.all_quotes.place(x=50,y = 100)
+
+
+        self.all_quotes.heading("#0",text="Buyer")
+        self.all_quotes.heading("Crop", text="Crop")
+        self.all_quotes.heading("Quote", text="Quote")
+        self.all_quotes.heading("Timestamp", text="Timestamp")
+
         # self.all_quotes.pack()
         conn=sqlite3.connect('FTMS.db')
         crsr=conn.cursor()
@@ -434,20 +448,22 @@ class Show_Q:
         list=crsr.fetchall()
         conn.commit()
         conn.close()
-        print(type(self.all_quotes))
         # self.all_quotes = Listbox(Frame_login)
 
         for item in list:
-            self.all_quotes.insert(END, item)
-
-        More_Details = Button(Frame_login,text="Show Details",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0, command = self.select).place(x=70, y=400)
-
-        Contact = Button(Frame_login,text="Contact",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0,command=self.contact).place(x=70, y=450)
+            self.all_quotes.insert("", 'end', text=item[0], values=(item[1],item[2],item[3]))
+        
+        Contact = Button(Frame_login,text="Select Quote",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0,command=self.contact).place(x=70, y=450)
 
         Back = Button(Frame_login,text="Back",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0,command=self.back).place(x=70, y=500)
+        
         self.display_label = Label(Frame_login,text='')
         self.display_label.place(x=400, y=400)
+
+        
     def contact(self):
+        Selected = self.all_quotes.item(self.all_quotes.focus())
+
         conn=sqlite3.connect('FTMS.db')
         crsr=conn.cursor()
         crsr.execute("SELECT * FROM TRANS")
@@ -456,21 +472,21 @@ class Show_Q:
         {
             'Tr_ID':s+1,
             'Fr_ID':ID,
-            'Br_ID':self.all_quotes.get(ANCHOR)[0],
-            'C_ID':self.all_quotes.get(ANCHOR)[1],
+            'Br_ID':Selected['text'],
+            'C_ID':Selected['values'][0],
             'dt':datetime.datetime.now()
         })
         crsr.execute("DELETE FROM QUOTATIONS WHERE B_ID=:Br_ID AND CROP_ID=:C_ID",
         {
-            'Br_ID':self.all_quotes.get(ANCHOR)[0],
-            'C_ID':self.all_quotes.get(ANCHOR)[1]
+            'Br_ID':Selected['text'],
+            'C_ID':Selected['values'][0]
         })
         conn.commit()
         conn.close()
+        refresh = Show_Q(self.root)
+
     def back(self):
         back=FPortal(self.root)
-    def select(self):
-        self.display_label.config(text=self.all_quotes.get(ANCHOR))
 
 class Show_H:
     def __init__(self,root):
@@ -641,7 +657,6 @@ class Edit_F:
         B1.pack()
         popup.mainloop() 
 
-
 class Make_Q:
     global ID
     def __init__(self,root):
@@ -809,7 +824,6 @@ class Show_H_B:
 
     def select(self):
         self.display_label.config(text=self.all_quotes.get(ANCHOR))
-
 
 global root
 root=Tk()
