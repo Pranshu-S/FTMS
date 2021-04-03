@@ -104,10 +104,7 @@ class Register:
 
         Farmer = Button(Frame_register, text="Farmer", bg="white",activebackground="#fc6203", height= 6, width=10, bd=0, command = self.goto_farmer, font=("Sans Serif",20)).place(x=100, y= 170)
         
-        Buyer = Button(Frame_register, text="Buyer",bg="white",activebackground="#fc6203", bd=0, height= 6, width=10, command=self.goto_buyer, font=("Sans Serif",20)).place(x=400, y= 170)
-
-        Next_Button =Button(self.root, text="Next",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20),command = lambda: self.clicked(var.get())).place(x=640, y= 500)
-        
+        Buyer = Button(Frame_register, text="Buyer",bg="white",activebackground="#fc6203", bd=0, height= 6, width=10, command=self.goto_buyer, font=("Sans Serif",20)).place(x=400, y= 170)        
 
     def goto_buyer(self):
         Buyer_Register=Register_B(self.root)
@@ -165,25 +162,68 @@ class Register_F:
         Next_Button =Button(self.root, text="Register",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20),command = self.submit).place(x=640, y= 460)
     
     def submit(self):
+        IS_AVAILABLE = 1   
         conn=sqlite3.connect('FTMS.db')
         crsr=conn.cursor()
-        crsr.execute("INSERT INTO FARMER VALUES(:USER_ID,:PWD, :NAME, :LOC ,:CONTACT)",
+
+        crsr.execute("SELECT * FROM FARMER WHERE F_ID=:USER_ID",
+        {
+            'USER_ID':self.txt_user.get()
+        })
+        c=crsr.fetchall()
+        if len(c)== 0:
+            crsr.execute("SELECT * FROM BUYER WHERE B_ID=:USER_ID",
             {
-                'USER_ID':self.txt_user.get(),
-                'PWD':self.txt_pass.get(),
-                'NAME':self.txt_name.get(),
-                'LOC':self.txt_location.get(),
-                'CONTACT':self.txt_contact.get()
+            'USER_ID':self.txt_user.get()
             })
-        crsr.execute("INSERT INTO CROP_GROWN VALUES(:USER_ID,:C_ID)",
-            {
-                'USER_ID':self.txt_user.get(),
-                'C_ID':int(self.txt_crop.get())
-            })
+            c=crsr.fetchall()
+            if len(c) != 0:
+                IS_AVAILABLE = 0
+        else:
+            IS_AVAILABLE = 0
+
+        if IS_AVAILABLE:
+
+            if self.txt_pass.get() == self.txt_conf_pass.get():
+
+                if len(self.txt_contact.get())==10:
+                    crsr.execute("INSERT INTO FARMER VALUES(:USER_ID,:PWD, :NAME, :LOC ,:CONTACT)",
+                        {
+                            'USER_ID':self.txt_user.get(),
+                            'PWD':self.txt_pass.get(),
+                            'NAME':self.txt_name.get(),
+                            'LOC':self.txt_location.get(),
+                            'CONTACT':self.txt_contact.get()
+                        })
+                    crsr.execute("INSERT INTO CROP_GROWN VALUES(:USER_ID,:C_ID)",
+                        {
+                            'USER_ID':self.txt_user.get(),
+                            'C_ID':int(self.txt_crop.get())
+                        })
+
+                    conn.commit()
+                    conn.close()
+                    login1 = Login(self.root)
+                else:
+                    self.popupmsg("ENTER VALID PHONE NUMBER!")
+
+            else:
+                self.popupmsg("PASSWORDS DO NOT MATCH!")
+        
+        else:
+            self.popupmsg("USERID ALREADY EXISTS!")
 
         conn.commit()
         conn.close()
-        login1 = Login(self.root)
+
+    def popupmsg(self,msg):
+        popup = Tk()
+        popup.wm_title("!")
+        label = Label(popup, text=msg)
+        label.pack(side="top", fill="x", pady=10)
+        B1 = Button(popup, text="Okay", command = popup.destroy)
+        B1.pack()
+        popup.mainloop() 
 
 class Register_B:
     def __init__(self,root):
@@ -231,19 +271,62 @@ class Register_B:
         Next_Button =Button(self.root, text="Register",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20),command=self.submit).place(x=450, y= 480)           
 
     def submit(self):
+        IS_AVAILABLE = 1   
         conn=sqlite3.connect('FTMS.db')
         crsr=conn.cursor()
-        crsr.execute("INSERT INTO BUYER VALUES(:USER_ID,:PWD, :NAME, :LOC ,:CONTACT)",
+
+        crsr.execute("SELECT * FROM FARMER WHERE F_ID=:USER_ID",
+        {
+            'USER_ID':self.txt_user.get()
+        })
+        c=crsr.fetchall()
+        if len(c)== 0:
+            crsr.execute("SELECT * FROM BUYER WHERE B_ID=:USER_ID",
             {
-                'USER_ID':self.txt_user.get(),
-                'PWD':self.txt_pass.get(),
-                'NAME':self.txt_name.get(),
-                'LOC':self.txt_location.get(),
-                'CONTACT':self.txt_contact.get()
+            'USER_ID':self.txt_user.get()
             })
+            c=crsr.fetchall()
+            if len(c) != 0:
+                IS_AVAILABLE = 0
+        else:
+            IS_AVAILABLE = 0
+
+        if IS_AVAILABLE:
+
+            if self.txt_pass.get() == self.txt_conf_pass.get():
+
+                if len(self.txt_contact.get())==10:
+                    crsr.execute("INSERT INTO BUYER VALUES(:USER_ID,:PWD, :NAME, :LOC ,:CONTACT)",
+                        {
+                            'USER_ID':self.txt_user.get(),
+                            'PWD':self.txt_pass.get(),
+                            'NAME':self.txt_name.get(),
+                            'LOC':self.txt_location.get(),
+                            'CONTACT':self.txt_contact.get()
+                        })
+                    conn.commit()
+                    conn.close()
+                    login = Login(self.root)
+                else:
+                    self.popupmsg("ENTER VALID PHONE NUMBER!")
+
+            else:
+                self.popupmsg("PASSWORDS DO NOT MATCH!")
+        
+        else:
+            self.popupmsg("USERID ALREADY EXISTS!")
+
         conn.commit()
         conn.close()
-        buyer_portal = BPortal(self.root)
+
+    def popupmsg(self,msg):
+        popup = Tk()
+        popup.wm_title("!")
+        label = Label(popup, text=msg)
+        label.pack(side="top", fill="x", pady=10)
+        B1 = Button(popup, text="Okay", command = popup.destroy)
+        B1.pack()
+        popup.mainloop() 
 
 class FPortal:
     def __init__(self,root):
