@@ -44,6 +44,8 @@ class Login:
         if len(c) != 0:
             if c[0][1]==self.txt_pass.get():
                 farmer_portal=FPortal(self.root)
+                root.mainloop()
+
         else:
             crsr.execute("SELECT * FROM BUYER WHERE B_ID=:USER_ID",
             {
@@ -53,6 +55,8 @@ class Login:
             if c != 0:
                 if c[0][1]==self.txt_pass.get():
                     buyer_portal=BPortal(self.root)
+                    root.mainloop()
+
         conn.commit()
         conn.close()
 
