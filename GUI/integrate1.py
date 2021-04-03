@@ -1,6 +1,7 @@
 # Import Tkinter Module
 from tkinter import *
 import sqlite3
+import datetime
 from PIL import ImageTk
 ID='a'
 class Login:
@@ -285,6 +286,7 @@ class BPortal:
         root.mainloop()
 
 class Show_Q:
+    global ID
     def __init__(self,root):
 
         self.root = root
@@ -307,13 +309,26 @@ class Show_Q:
         self.all_quotes = Listbox(Frame_login,bg="white",fg="#fc6203", bd=0,height=14,width=100)
         self.all_quotes.place(x=50,y = 100)
         # self.all_quotes.pack()
-
-
+        global S
+        print(ID)
+        conn=sqlite3.connect('FTMS.db')
+        crsr=conn.cursor()
+        crsr.execute("SELECT CROP_ID FROM CROP_GROWN WHERE F_ID=:USER_ID",
+        {
+            'USER_ID':ID
+        })
+        cid=crsr.fetchall()
+        
+        print(cid)
+        crsr.execute("SELECT * FROM QUOTATIONS WHERE CROP_ID=:C_ID",
+        {
+            'C_ID':cid[0][0]
+        })
+        list=crsr.fetchall()
         print(type(self.all_quotes))
         # self.all_quotes = Listbox(Frame_login)
-        my_list = [100,200,300,400,500]
 
-        for item in my_list:
+        for item in list:
             self.all_quotes.insert(END, item)
 
         More_Details = Button(Frame_login,text="Show Details",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0, command = self.select).place(x=70, y=400)
@@ -445,6 +460,7 @@ class Edit_F:
         conn.close()
 
 class Make_Q:
+    global ID
     def __init__(self,root):
         self.root = root
         self.root.title("FTMS Login")
@@ -472,8 +488,24 @@ class Make_Q:
         self.txt_price = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
         self.txt_price.place(x=70,y=220, width=350, height=35)
 
-        Submit_Button=Button(self.root, text="Submit",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20)).place(x=680, y= 420)
-        Back_Button=Button(self.root, text="Back",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20)).place(x=550, y= 420)
+        Submit_Button=Button(self.root, text="Submit",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20),command=self.submit).place(x=680, y= 420)
+        Back_Button=Button(self.root, text="Back",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20),command=self.back).place(x=550, y= 420)
+    def back(self):
+        back=BPortal(self.root)
+    def submit(self):
+        global ID
+        dt=datetime.datetime.now()
+        conn=sqlite3.connect('FTMS.db')
+        crsr=conn.cursor()
+        crsr.execute("INSERT INTO QUOTATIONS VALUES(:USER_ID,:C_ID,:AMT,:DT)",
+            {
+                'USER_ID':ID,
+                'C_ID':int(self.txt_crop.get()),
+                'AMT':self.txt_price.get(),
+                'DT':dt
+            })
+        conn.commit()
+        conn.close()
 
 
 
