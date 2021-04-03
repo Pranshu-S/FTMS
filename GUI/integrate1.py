@@ -421,7 +421,6 @@ class Show_Q:
         self.all_quotes.place(x=50,y = 100)
         # self.all_quotes.pack()
         global S
-        print(ID)
         conn=sqlite3.connect('FTMS.db')
         crsr=conn.cursor()
         crsr.execute("SELECT CROP_ID FROM CROP_GROWN WHERE F_ID=:USER_ID",
@@ -498,6 +497,30 @@ class Show_H:
 class Edit_F:
     global ID
     def __init__(self,root):
+
+        conn=sqlite3.connect('FTMS.db')
+        crsr=conn.cursor() 
+        crsr.execute("SELECT * FROM FARMER WHERE F_ID = :USER_ID",
+            {
+                'USER_ID':ID               
+            })
+        details = crsr.fetchall()
+
+        self.PWD = details[0][1]
+        self.LOCATION = details[0][3]
+        self.CONTACT = details[0][4]
+        
+        crsr.execute("SELECT * FROM CROP_GROWN WHERE F_ID = :USER_ID",
+            {
+                'USER_ID':ID               
+            })
+        details = crsr.fetchall()   
+
+        conn.commit()
+        conn.close()
+
+        self.CROP = details[0][1]
+
         self.root = root
         self.root.title("Edit Farmer Profile")
         self.root.geometry("1024x640")
@@ -515,59 +538,90 @@ class Edit_F:
         title_2 = Label(Frame_login, text="FTMS ", font=("Sans Serif",20, "bold"),fg="#fc6203", bg="white").place(x=330, y=30)
         desc = Label(Frame_login, text="Farmers Transaction Management System ", font=("Sans Serif",10),fg="grey", bg="white").place(x=115, y=70)
 
+        old_pass = StringVar(value=self.PWD)
         lbl_pass = Label(Frame_login,text="Change Password",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=70, y=190)
-        self.txt_pass = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
+        self.txt_pass = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0", show="*", textvariable=old_pass)
         self.txt_pass.place(x=70,y=220, width=250, height=35)
 
+        old_pass1 = StringVar(value=self.PWD)
         conf_lbl_pass = Label(Frame_login,text="Confirm Change Password",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=70, y=260)
-        self.txt_conf_pass = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
+        self.txt_conf_pass = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0",show="*", textvariable=old_pass1)
         self.txt_conf_pass.place(x=70,y=290, width=250, height=35)
 
-        lbl_location = Label(Frame_login,text="Change Location",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=400, y=110)
-        self.txt_location = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
+        old_location = StringVar(value=self.LOCATION)
+        lbl_location = Label(Frame_login,text="Change Location", font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=400, y=110)
+        self.txt_location = Entry(Frame_login, font=("Sans Serif",10), textvariable = old_location,bg="#ebedf0")
         self.txt_location.place(x=400,y=140, width=250, height=35)
 
+        old_contact = StringVar(value=self.CONTACT)
         lbl_contact = Label(Frame_login,text="Change Contact Number",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=70, y=110)
-        self.txt_contact = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
+        self.txt_contact = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0",textvariable= old_contact )
         self.txt_contact.place(x=70,y=140, width=250, height=35)
 
+        old_crop = StringVar(value=self.CROP)
         lbl_crop = Label(Frame_login,text="Change Crop",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=400, y=190)
-        self.txt_crop = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
+        self.txt_crop = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0",textvariable=old_crop)
         self.txt_crop.place(x=400,y=220, width=250, height=35)
 
-        Save =Button(self.root, text="Save",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20),command=self.save).place(x=640, y= 420)
+        Save =Button(self.root, text="Save",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20),command=self.save).place(x=400, y= 500)
         Back =Button(self.root, text="Back",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20),command=self.back).place(x=640, y= 500)
+   
     def back(self):
         back=FPortal(self.root)
+    
     def save(self):
         global ID
+
         conn=sqlite3.connect('FTMS.db')
         crsr=conn.cursor() 
-        crsr.execute("UPDATE FARMER SET PWD = :PWD WHERE F_ID = :USER_ID",
-            {
-                'USER_ID':ID,
-                'PWD':self.txt_pass.get()
-                
-            })
+
+        if self.txt_conf_pass.get() == self.txt_pass.get():
+            crsr.execute("UPDATE FARMER SET PWD = :PWD WHERE F_ID = :USER_ID",
+                {
+                    'USER_ID':ID,
+                    'PWD':self.txt_pass.get()
+                })
+        else:
+            self.popupmsg("PASSWORDS DO NOT MATCH!")
+
+
         crsr.execute("UPDATE FARMER SET LOCATION = :LOC WHERE F_ID = :USER_ID",
             {
                 'USER_ID':ID,
                 'LOC':self.txt_location.get()
                 
             })
-        crsr.execute("UPDATE FARMER SET CONTACT = :con WHERE F_ID = :USER_ID",
-            {
-                'USER_ID':ID,
-                'con':self.txt_contact.get()
-                
-            })
+        
+        if len(self.txt_contact.get())==10:
+            crsr.execute("UPDATE FARMER SET CONTACT = :con WHERE F_ID = :USER_ID",
+                {
+                    'USER_ID':ID,
+                    'con':self.txt_contact.get()
+                    
+                })
+        else:
+            self.popupmsg("INVALID CONTACT NUMBER!")
+
+
         crsr.execute("  UPDATE CROP_GROWN SET CROP_ID = :C_ID WHERE F_ID = :USER_ID",
             {
                 'USER_ID':ID,
                 'C_ID':int(self.txt_crop.get())
             })
+        
         conn.commit()
         conn.close()
+        back=FPortal(self.root)
+
+    def popupmsg(self,msg):
+        popup = Tk()
+        popup.wm_title("!")
+        label = Label(popup, text=msg)
+        label.pack(side="top", fill="x", pady=10)
+        B1 = Button(popup, text="Okay", command = popup.destroy)
+        B1.pack()
+        popup.mainloop() 
+
 
 class Make_Q:
     global ID
