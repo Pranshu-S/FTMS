@@ -3,6 +3,7 @@ from tkinter import *
 import sqlite3
 from PIL import ImageTk
 ID='a'
+
 class Login:
     global ID
     def __init__(self,root):
@@ -43,8 +44,10 @@ class Login:
             'USER_ID':self.txt_user.get()
         })
         c=crsr.fetchall()
-        if len(c) != 0:
+        redirected=0
+        if len(c)!= 0:
             if c[0][1]==self.txt_pass.get():
+                redirected=1
                 ID=self.txt_user.get()
                 farmer_portal=FPortal(self.root)
                 root.mainloop()
@@ -55,18 +58,29 @@ class Login:
             'USER_ID':self.txt_user.get()
             })
             c=crsr.fetchall()
-            if c != 0:
+            if len(c)!= 0:
                 if c[0][1]==self.txt_pass.get():
+                    redirected=1
                     ID=self.txt_user.get()
                     buyer_portal=BPortal(self.root)
                     root.mainloop()
-
         conn.commit()
         conn.close()
+        if(redirected==0):
+            self.popupmsg()
 
     def open(self):
         Register_window=Register(self.root)
         root.mainloop()
+
+    def popupmsg(self):
+        popup = Tk()
+        popup.wm_title("!")
+        label = Label(popup, text="Invalid UserID or Password")
+        label.pack(side="top", fill="x", pady=10)
+        B1 = Button(popup, text="Okay", command = popup.destroy)
+        B1.pack()
+        popup.mainloop()
   
 class Register:
     def __init__(self,root):
@@ -82,23 +96,23 @@ class Register:
         # Login Frames
         Frame_register=Frame(self.root, bg="white")
         Frame_register.place(x=170, y=100, height=500, width=700)
-        var = IntVar()
 
         title = Label(Frame_register, text="Register on", font=("Sans Serif",20),fg="black", bg="white").place(x=170, y=30)
         title_2 = Label(Frame_register, text="FTMS ", font=("Sans Serif",20, "bold"),fg="#fc6203", bg="white").place(x=330, y=30)
         desc = Label(Frame_register, text="Farmers Transaction Management System ", font=("Sans Serif",10),fg="grey", bg="white").place(x=150, y=70)
 
-        Farmer = Radiobutton(Frame_register, text="Farmer",variable=var, value=1, bg="white",activebackground="#fc6203", height= 6, width=10, bd=0, font=("Sans Serif",20)).place(x=100, y= 170)
+        Farmer = Button(Frame_register, text="Farmer", bg="white",activebackground="#fc6203", height= 6, width=10, bd=0, command = self.goto_farmer, font=("Sans Serif",20)).place(x=100, y= 170)
         
-        Buyer=Radiobutton(Frame_register, text="Buyer",variable=var, value=2,bg="white",activebackground="#fc6203", bd=0, height= 6, width=10, font=("Sans Serif",20)).place(x=400, y= 170)
+        Buyer = Button(Frame_register, text="Buyer",bg="white",activebackground="#fc6203", bd=0, height= 6, width=10, command=self.goto_buyer, font=("Sans Serif",20)).place(x=400, y= 170)
 
         Next_Button =Button(self.root, text="Next",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20),command = lambda: self.clicked(var.get())).place(x=640, y= 500)
         
-    def clicked(self, value):
-        if value==1:
-            Farmer_Register=Register_F(self.root)
-        else:
-            Buyer_Register=Register_B(self.root)
+
+    def goto_buyer(self):
+        Buyer_Register=Register_B(self.root)
+
+    def goto_farmer(self):
+        Farmer_Register=Register_F(self.root)
 
 class Register_F:
     def __init__(self,root):
@@ -247,15 +261,19 @@ class FPortal:
         title = Label(Frame_login, text="FARMER", font=("Sans Serif",20),fg="black", bg="white").place(x=150, y=30)
         title_2 = Label(Frame_login, text="PORTAL", font=("Sans Serif",20, "bold"),fg="#fc6203", bg="white").place(x=270, y=30)
         desc = Label(Frame_login, text="Farmers Transaction Management System ", font=("Sans Serif",10),fg="grey", bg="white").place(x=130, y=70)
-        view_quotations = Button(Frame_login,text="View Quotations",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0, width=20,command=self.open1).place(x=100, y=170)
-        show_history = Button(Frame_login,text="Show History",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0, width=20,command=self.open2).place(x=100, y=220)
-        edit_profile = Button(Frame_login,text="Edit Profile",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0, width=20,command=self.open3).place(x=100, y=270)
+        view_quotations = Button(Frame_login,text="View Quotations",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0, width=20,command=self.open1).place(x=110, y=160)
+        show_history = Button(Frame_login,text="Show History",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0, width=20,command=self.open2).place(x=110, y=210)
+        edit_profile = Button(Frame_login,text="Edit Profile",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0, width=20,command=self.open3).place(x=110, y=260)
+        Logout = Button(Frame_login, text="Logout",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",15),command = self.logout,width=20,).place(x=110, y= 310)
+
     def open1(self):
         ViewQ=Show_Q(self.root)
     def open2(self):
         ViewH=Show_H(self.root)
     def open3(self):
         EditF=Edit_F(self.root)
+    def logout(self):
+        login=Login(self.root)
 
 class BPortal:
     def __init__(self,root):
