@@ -47,6 +47,8 @@ class Login:
             if c[0][1]==self.txt_pass.get():
                 ID=self.txt_user.get()
                 farmer_portal=FPortal(self.root)
+                root.mainloop()
+
         else:
             crsr.execute("SELECT * FROM BUYER WHERE B_ID=:USER_ID",
             {
@@ -57,6 +59,8 @@ class Login:
                 if c[0][1]==self.txt_pass.get():
                     ID=self.txt_user.get()
                     buyer_portal=BPortal(self.root)
+                    root.mainloop()
+
         conn.commit()
         conn.close()
 
@@ -252,32 +256,34 @@ class FPortal:
         ViewH=Show_H(self.root)
     def open3(self):
         EditF=Edit_F(self.root)
+
 class BPortal:
-        def __init__(self,root):
-            self.root = root
-            self.root.title("BUYER PORTAL")
-            self.root.geometry("1024x640")
-            self.root.resizable(False,False)
-        
-            # Background Image
-            self.bg =  ImageTk.PhotoImage(file="Login_img.jpg")
-            self.bg_image = Label(self.root, image=self.bg).place(x=0,y=0,relwidth=1,relheight=1 )
-        
-            # Login Frames
-            Frame_login=Frame(self.root, bg="white")
-            Frame_login.place(x=50, y=50, height=550, width=900)
+    def __init__(self,root):
+        self.root = root
+        self.root.title("BUYER PORTAL")
+        self.root.geometry("1024x640")
+        self.root.resizable(False,False)
+    
+        # Background Image
+        self.bg =  ImageTk.PhotoImage(file="Login_img.jpg")
+        self.bg_image = Label(self.root, image=self.bg).place(x=0,y=0,relwidth=1,relheight=1 )
+    
+        # Login Frames
+        Frame_login=Frame(self.root, bg="white")
+        Frame_login.place(x=450, y=100, height=400, width=500)
 
-            title = Label(Frame_login, text="Register on", font=("Sans Serif",20),fg="black", bg="white").place(x=170, y=30)
-            title_2 = Label(Frame_login, text="FTMS ", font=("Sans Serif",20, "bold"),fg="#fc6203", bg="white").place(x=330, y=30)
-            desc = Label(Frame_login, text="Farmers Transaction Management System ", font=("Sans Serif",10),fg="grey", bg="white").place(x=115, y=70)
-        
-            Make_quotations = Button(Frame_login,text="Make Quotations",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0).place(x=70, y=110)
+        title = Label(Frame_login, text="BUYER", font=("Sans Serif",20),fg="black", bg="white").place(x=160, y=30)
+        title_2 = Label(Frame_login, text="PORTAL", font=("Sans Serif",20, "bold"),fg="#fc6203", bg="white").place(x=260, y=30)
+        desc = Label(Frame_login, text="Farmers Transaction Management System ", font=("Sans Serif",10),fg="grey", bg="white").place(x=130, y=70) 
+        Make_quotations = Button(Frame_login,text="Make Quotations",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0, width=20, command=self.make).place(x=110, y=120)
+        show_history = Button(Frame_login,text="Show History",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0, width=20).place(x=110, y=180)
+        edit_profile = Button(Frame_login,text="Edit Profile",font=("Sans Serif",15),bg="#fc6203",fg="white",width=20, bd=0).place(x=110, y=240)
+        my_quotations = Button(Frame_login,text="My Quotations",font=("Sans Serif",15),bg="#fc6203",fg="white", width=20,bd=0).place(x=110, y=300)
 
-            show_history = Button(Frame_login,text="Show History",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0).place(x=70, y=190)
+    def make(self):
+        Make_quote = Make_Q(self.root)
+        root.mainloop()
 
-            edit_profile = Button(Frame_login,text="Edit Profile",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0).place(x=70, y=260)
-
-            my_quotations = Button(Frame_login,text="My Quotations",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0).place(x=70, y=330)
 class Show_Q:
     def __init__(self,root):
 
@@ -321,6 +327,7 @@ class Show_Q:
         back=FPortal(self.root)
     def select(self):
         self.display_label.config(text=self.all_quotes.get(ANCHOR))
+
 class Show_H:
     def __init__(self,root):
 
@@ -361,6 +368,8 @@ class Show_H:
         back=FPortal(self.root)    
     def select(self):
         self.display_label.config(text=self.all_quotes.get(ANCHOR))
+
+
 class Edit_F:
     global ID
     def __init__(self,root):
@@ -380,7 +389,6 @@ class Edit_F:
         title = Label(Frame_login, text="Register on", font=("Sans Serif",20),fg="black", bg="white").place(x=170, y=30)
         title_2 = Label(Frame_login, text="FTMS ", font=("Sans Serif",20, "bold"),fg="#fc6203", bg="white").place(x=330, y=30)
         desc = Label(Frame_login, text="Farmers Transaction Management System ", font=("Sans Serif",10),fg="grey", bg="white").place(x=115, y=70)
-        
 
         lbl_pass = Label(Frame_login,text="Change Password",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=70, y=190)
         self.txt_pass = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
@@ -401,7 +409,6 @@ class Edit_F:
         lbl_crop = Label(Frame_login,text="Change Crop",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=400, y=190)
         self.txt_crop = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
         self.txt_crop.place(x=400,y=220, width=250, height=35)
-
 
         Save =Button(self.root, text="Save",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20),command=self.save).place(x=640, y= 420)
         Back =Button(self.root, text="Back",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20),command=self.back).place(x=640, y= 500)
@@ -436,6 +443,39 @@ class Edit_F:
             })
         conn.commit()
         conn.close()
+
+class Make_Q:
+    def __init__(self,root):
+        self.root = root
+        self.root.title("FTMS Login")
+        self.root.geometry("1024x640")
+        self.root.resizable(False,False)
+        
+        # Background Image
+        self.bg =  ImageTk.PhotoImage(file="Login_img.jpg")
+        self.bg_image = Label(self.root, image=self.bg).place(x=0,y=0,relwidth=1,relheight=1 )
+        
+        # Login Frames
+        Frame_login=Frame(self.root, bg="white")
+        Frame_login.place(x=450, y=100, height=340, width=500)
+        
+        title = Label(Frame_login, text="Welcome to ", font=("Sans Serif",20),fg="black", bg="white").place(x=130, y=30)
+        title_2 = Label(Frame_login, text="FTMS ", font=("Sans Serif",20, "bold"),fg="#fc6203", bg="white").place(x=290, y=30)
+        desc = Label(Frame_login, text="Farmers Transaction Management System ", font=("Sans Serif",10),fg="grey", bg="white").place(x=115, y=70)
+
+        lbl_crop = Label(Frame_login,text="Crop",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=70, y=110)
+        self.txt_crop = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
+        self.txt_crop.place(x=70,y=140, width=350, height=35)
+
+
+        lbl_price = Label(Frame_login,text="Quote (Rs/kg)",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=70, y=190)
+        self.txt_price = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
+        self.txt_price.place(x=70,y=220, width=350, height=35)
+
+        Submit_Button=Button(self.root, text="Submit",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20)).place(x=680, y= 420)
+        Back_Button=Button(self.root, text="Back",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20)).place(x=550, y= 420)
+
+
 
     
 global root
