@@ -2,7 +2,9 @@
 from tkinter import *
 import sqlite3
 from PIL import ImageTk
+ID='a'
 class Login:
+    global ID
     def __init__(self,root):
         self.root = root
         self.root.title("FTMS Login")
@@ -33,6 +35,7 @@ class Login:
         Login_Button=Button(self.root, text="Login",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20),command=self.check).place(x=750, y= 420)
 
     def check(self):
+        global ID
         conn=sqlite3.connect('FTMS.db')
         crsr=conn.cursor()
         crsr.execute("SELECT * FROM FARMER WHERE F_ID=:USER_ID",
@@ -42,6 +45,7 @@ class Login:
         c=crsr.fetchall()
         if len(c) != 0:
             if c[0][1]==self.txt_pass.get():
+                ID=self.txt_user.get()
                 farmer_portal=FPortal(self.root)
         else:
             crsr.execute("SELECT * FROM BUYER WHERE B_ID=:USER_ID",
@@ -51,6 +55,7 @@ class Login:
             c=crsr.fetchall()
             if c != 0:
                 if c[0][1]==self.txt_pass.get():
+                    ID=self.txt_user.get()
                     buyer_portal=BPortal(self.root)
         conn.commit()
         conn.close()
@@ -351,6 +356,7 @@ class Show_H:
     def select(self):
         self.display_label.config(text=self.all_quotes.get(ANCHOR))
 class Edit_F:
+    global ID
     def __init__(self,root):
         self.root = root
         self.root.title("Edit Farmer Profile")
@@ -391,10 +397,35 @@ class Edit_F:
         self.txt_crop.place(x=400,y=220, width=250, height=35)
 
 
-        Save =Button(self.root, text="Save",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20)).place(x=640, y= 420)
+        Save =Button(self.root, text="Save",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20),command=self.save).place(x=640, y= 420)
         Back =Button(self.root, text="Back",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20),command=self.back).place(x=640, y= 500)
     def back(self):
         back=FPortal(self.root)
+    def save(self):
+        global ID
+        conn=sqlite3.connect('FTMS.db')
+        crsr=conn.cursor() 
+        crsr.execute("UPDATE FARMER SET PWD = :PWD WHERE F_ID = :USER_ID",
+            {
+                'USER_ID':ID,
+                'PWD':self.txt_pass.get()
+                
+            })
+        crsr.execute("UPDATE FARMER SET LOCATION = :LOC WHERE F_ID = :USER_ID",
+            {
+                'USER_ID':ID,
+                'LOC':self.txt_location.get()
+                
+            })
+        crsr.execute("UPDATE FARMER SET CONTACT = :con WHERE F_ID = :USER_ID",
+            {
+                'USER_ID':ID,
+                'con':self.txt_contact.get()
+                
+            })
+        conn.commit()
+        conn.close()
+
     
 global root
 root=Tk()
