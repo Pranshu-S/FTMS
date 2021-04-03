@@ -309,8 +309,6 @@ class Show_Q:
         self.all_quotes = Listbox(Frame_login,bg="white",fg="#fc6203", bd=0,height=14,width=100)
         self.all_quotes.place(x=50,y = 100)
         # self.all_quotes.pack()
-        global S
-        print(ID)
         conn=sqlite3.connect('FTMS.db')
         crsr=conn.cursor()
         crsr.execute("SELECT CROP_ID FROM CROP_GROWN WHERE F_ID=:USER_ID",
@@ -318,13 +316,13 @@ class Show_Q:
             'USER_ID':ID
         })
         cid=crsr.fetchall()
-        
-        print(cid)
         crsr.execute("SELECT * FROM QUOTATIONS WHERE CROP_ID=:C_ID",
         {
             'C_ID':cid[0][0]
         })
         list=crsr.fetchall()
+        conn.commit()
+        conn.close()
         print(type(self.all_quotes))
         # self.all_quotes = Listbox(Frame_login)
 
@@ -333,11 +331,31 @@ class Show_Q:
 
         More_Details = Button(Frame_login,text="Show Details",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0, command = self.select).place(x=70, y=400)
 
-        Contact = Button(Frame_login,text="Contact",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0).place(x=70, y=450)
+        Contact = Button(Frame_login,text="Contact",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0,command=self.contact).place(x=70, y=450)
 
         Back = Button(Frame_login,text="Back",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0,command=self.back).place(x=70, y=500)
         self.display_label = Label(Frame_login,text='')
         self.display_label.place(x=400, y=400)
+    def contact(self):
+        conn=sqlite3.connect('FTMS.db')
+        crsr=conn.cursor()
+        crsr.execute("SELECT * FROM TRANS")
+        s=len(crsr.fetchall())
+        crsr.execute("INSERT INTO TRANS VALUES(:Tr_ID,:Fr_ID,:Br_ID,:C_ID,:dt)",
+        {
+            'Tr_ID':s+1,
+            'Fr_ID':ID,
+            'Br_ID':self.all_quotes.get(ANCHOR)[0],
+            'C_ID':self.all_quotes.get(ANCHOR)[1],
+            'dt':datetime.datetime.now()
+        })
+        crsr.execute("DELETE FROM QUOTATIONS WHERE B_ID=:Br_ID AND CROP_ID=:C_ID",
+        {
+            'Br_ID':self.all_quotes.get(ANCHOR)[0],
+            'C_ID':self.all_quotes.get(ANCHOR)[1]
+        })
+        conn.commit()
+        conn.close()
     def back(self):
         back=FPortal(self.root)
     def select(self):
