@@ -160,9 +160,15 @@ class Register_F:
                 'LOC':self.txt_location.get(),
                 'CONTACT':self.txt_contact.get()
             })
+        crsr.execute("INSERT INTO CROP_GROWN VALUES(:USER_ID,:C_ID)",
+            {
+                'USER_ID':self.txt_user.get(),
+                'C_ID':int(self.txt_crop.get())
+            })
+
         conn.commit()
         conn.close()
-        farmer_portal = FPortal(self.root)
+        login1 = Login(self.root)
 
 class Register_B:
     def __init__(self,root):
@@ -438,6 +444,11 @@ class Edit_F:
                 'USER_ID':ID,
                 'con':self.txt_contact.get()
                 
+            })
+        crsr.execute("  UPDATE CROP_GROWN SET CROP_ID = :C_ID WHERE F_ID = :USER_ID",
+            {
+                'USER_ID':ID,
+                'C_ID':int(self.txt_crop.get())
             })
         conn.commit()
         conn.close()
