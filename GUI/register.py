@@ -24,11 +24,11 @@ class Register:
         title_2 = Label(Frame_register, text="FTMS ", font=("Sans Serif",20, "bold"),fg="#fc6203", bg="white").place(x=330, y=30)
         desc = Label(Frame_register, text="Farmers Transaction Management System ", font=("Sans Serif",10),fg="grey", bg="white").place(x=115, y=70)
 
-        Farmer = Radiobutton(Frame_register, text="Farmer",variable=var, value=1, bg="white",activebackground="#fc6203", height= 6, width=6, bd=0, font=("Sans Serif",20)).place(x=150, y= 170)
+        Farmer = Radiobutton(Frame_register, text="Farmer",variable=var, value=1, bg="white",fg="#fc6203",bd=0, font=("Sans Serif",10)).place(x=100, y= 260)
         
-        Buyer=Radiobutton(Frame_register, text="Buyer",variable=var, value=2,bg="white",activebackground="#fc6203", bd=0, height= 6, width=6, font=("Sans Serif",20)).place(x=350, y= 170)
+        Buyer=Radiobutton(Frame_register, text="Buyer",variable=var, value=2,bg="white",fg="#fc6203", bd=0, font=("Sans Serif",10)).place(x=280, y= 260)
 
-        Next_Button =Button(self.root, text="Next",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20)).place(x=640, y= 500)
+        Next_Button =Button(self.root, text="Next",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20)).place(x=640, y= 420)
 
 
 # Create Tkinter object

@@ -2,8 +2,9 @@
 from tkinter import *
 import sqlite3
 from PIL import ImageTk
-
+ID='a'
 class Login:
+    global ID
     def __init__(self,root):
         self.root = root
         self.root.title("FTMS Login")
@@ -34,6 +35,7 @@ class Login:
         Login_Button=Button(self.root, text="Login",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20),command=self.check).place(x=750, y= 420)
 
     def check(self):
+        global ID
         conn=sqlite3.connect('FTMS.db')
         crsr=conn.cursor()
         crsr.execute("SELECT * FROM FARMER WHERE F_ID=:USER_ID",
@@ -43,6 +45,7 @@ class Login:
         c=crsr.fetchall()
         if len(c) != 0:
             if c[0][1]==self.txt_pass.get():
+                ID=self.txt_user.get()
                 farmer_portal=FPortal(self.root)
                 root.mainloop()
 
@@ -54,6 +57,7 @@ class Login:
             c=crsr.fetchall()
             if c != 0:
                 if c[0][1]==self.txt_pass.get():
+                    ID=self.txt_user.get()
                     buyer_portal=BPortal(self.root)
                     root.mainloop()
 
@@ -237,13 +241,15 @@ class FPortal:
         title = Label(Frame_login, text="FARMER", font=("Sans Serif",20),fg="black", bg="white").place(x=150, y=30)
         title_2 = Label(Frame_login, text="PORTAL", font=("Sans Serif",20, "bold"),fg="#fc6203", bg="white").place(x=270, y=30)
         desc = Label(Frame_login, text="Farmers Transaction Management System ", font=("Sans Serif",10),fg="grey", bg="white").place(x=130, y=70)
-        
-        view_quotations = Button(Frame_login,text="View Quotations",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0, width=20).place(x=100, y=170)
-
-        show_history = Button(Frame_login,text="Show History",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0, width=20).place(x=100, y=220)
-
-        edit_profile = Button(Frame_login,text="Edit Profile",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0, width=20).place(x=100, y=270)
-
+        view_quotations = Button(Frame_login,text="View Quotations",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0, width=20,command=self.open1).place(x=100, y=170)
+        show_history = Button(Frame_login,text="Show History",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0, width=20,command=self.open2).place(x=100, y=220)
+        edit_profile = Button(Frame_login,text="Edit Profile",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0, width=20,command=self.open3).place(x=100, y=270)
+    def open1(self):
+        ViewQ=Show_Q(self.root)
+    def open2(self):
+        ViewH=Show_H(self.root)
+    def open3(self):
+        EditF=Edit_F(self.root)
 class BPortal:
         def __init__(self,root):
             self.root = root
@@ -270,7 +276,159 @@ class BPortal:
             edit_profile = Button(Frame_login,text="Edit Profile",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0).place(x=70, y=260)
 
             my_quotations = Button(Frame_login,text="My Quotations",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0).place(x=70, y=330)
+class Show_Q:
+    def __init__(self,root):
 
+        self.root = root
+        self.root.title("Quotations")
+        self.root.geometry("1024x640")
+        self.root.resizable(False,False)
+        
+        # Background Image
+        self.bg =  ImageTk.PhotoImage(file="Login_img.jpg")
+        self.bg_image = Label(self.root, image=self.bg).place(x=0,y=0,relwidth=1,relheight=1 )
+        
+        # Login Frames
+        Frame_login=Frame(self.root, bg="white")
+        Frame_login.place(x=50, y=50, height=550, width=900)
+
+        title = Label(Frame_login, text="Register on", font=("Sans Serif",20),fg="black", bg="white").place(x=170, y=30)
+        title_2 = Label(Frame_login, text="FTMS ", font=("Sans Serif",20, "bold"),fg="#fc6203", bg="white").place(x=330, y=30)
+        desc = Label(Frame_login, text="Farmers Transaction Management System ", font=("Sans Serif",10),fg="grey", bg="white").place(x=115, y=70)
+        
+        self.all_quotes = Listbox(Frame_login,bg="white",fg="#fc6203", bd=0,height=14,width=100)
+        self.all_quotes.place(x=50,y = 100)
+        # self.all_quotes.pack()
+
+
+        print(type(self.all_quotes))
+        # self.all_quotes = Listbox(Frame_login)
+        my_list = [100,200,300,400,500]
+
+        for item in my_list:
+            self.all_quotes.insert(END, item)
+
+        More_Details = Button(Frame_login,text="Show Details",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0, command = self.select).place(x=70, y=400)
+
+        Contact = Button(Frame_login,text="Contact",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0).place(x=70, y=450)
+
+        Back = Button(Frame_login,text="Back",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0,command=self.back).place(x=70, y=500)
+        self.display_label = Label(Frame_login,text='')
+        self.display_label.place(x=400, y=400)
+    def back(self):
+        back=FPortal(self.root)
+    def select(self):
+        self.display_label.config(text=self.all_quotes.get(ANCHOR))
+class Show_H:
+    def __init__(self,root):
+
+        self.root = root
+        self.root.title("History")
+        self.root.geometry("1024x640")
+        self.root.resizable(False,False)
+        
+        # Background Image
+        self.bg =  ImageTk.PhotoImage(file="Login_img.jpg")
+        self.bg_image = Label(self.root, image=self.bg).place(x=0,y=0,relwidth=1,relheight=1 )
+        
+        # Login Frames
+        Frame_login=Frame(self.root, bg="white")
+        Frame_login.place(x=50, y=50, height=550, width=900)
+
+        title = Label(Frame_login, text="Register on", font=("Sans Serif",20),fg="black", bg="white").place(x=170, y=30)
+        title_2 = Label(Frame_login, text="FTMS ", font=("Sans Serif",20, "bold"),fg="#fc6203", bg="white").place(x=330, y=30)
+        desc = Label(Frame_login, text="Farmers Transaction Management System ", font=("Sans Serif",10),fg="grey", bg="white").place(x=115, y=70)
+        
+        self.all_quotes = Listbox(Frame_login,bg="white",fg="#fc6203", bd=0,height=14,width=100)
+        self.all_quotes.place(x=50,y = 100)
+        # self.all_quotes.pack()
+
+
+        print(type(self.all_quotes))
+        # self.all_quotes = Listbox(Frame_login)
+        my_list = [100,200,300,400,500]
+
+        for item in my_list:
+            self.all_quotes.insert(END, item)
+
+        More_Details = Button(Frame_login,text="Show Details",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0, command = self.select).place(x=70, y=400)
+        Back = Button(Frame_login,text="Back",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0,command=self.back).place(x=70, y=500)
+        self.display_label = Label(Frame_login,text='')
+        self.display_label.place(x=400, y=400)
+    def back(self):
+        back=FPortal(self.root)    
+    def select(self):
+        self.display_label.config(text=self.all_quotes.get(ANCHOR))
+class Edit_F:
+    global ID
+    def __init__(self,root):
+        self.root = root
+        self.root.title("Edit Farmer Profile")
+        self.root.geometry("1024x640")
+        self.root.resizable(False,False)
+        
+        # Background Image
+        self.bg =  ImageTk.PhotoImage(file="Login_img.jpg")
+        self.bg_image = Label(self.root, image=self.bg).place(x=0,y=0,relwidth=1,relheight=1 )
+        
+        # Login Frames
+        Frame_login=Frame(self.root, bg="white")
+        Frame_login.place(x=170, y=100, height=500, width=700)
+
+        title = Label(Frame_login, text="Register on", font=("Sans Serif",20),fg="black", bg="white").place(x=170, y=30)
+        title_2 = Label(Frame_login, text="FTMS ", font=("Sans Serif",20, "bold"),fg="#fc6203", bg="white").place(x=330, y=30)
+        desc = Label(Frame_login, text="Farmers Transaction Management System ", font=("Sans Serif",10),fg="grey", bg="white").place(x=115, y=70)
+        
+
+        lbl_pass = Label(Frame_login,text="Change Password",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=70, y=190)
+        self.txt_pass = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
+        self.txt_pass.place(x=70,y=220, width=250, height=35)
+
+        conf_lbl_pass = Label(Frame_login,text="Confirm Change Password",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=70, y=260)
+        self.txt_conf_pass = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
+        self.txt_conf_pass.place(x=70,y=290, width=250, height=35)
+
+        lbl_location = Label(Frame_login,text="Change Location",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=400, y=110)
+        self.txt_location = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
+        self.txt_location.place(x=400,y=140, width=250, height=35)
+
+        lbl_contact = Label(Frame_login,text="Change Contact Number",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=70, y=110)
+        self.txt_contact = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
+        self.txt_contact.place(x=70,y=140, width=250, height=35)
+
+        lbl_crop = Label(Frame_login,text="Change Crop",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=400, y=190)
+        self.txt_crop = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
+        self.txt_crop.place(x=400,y=220, width=250, height=35)
+
+
+        Save =Button(self.root, text="Save",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20),command=self.save).place(x=640, y= 420)
+        Back =Button(self.root, text="Back",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20),command=self.back).place(x=640, y= 500)
+    def back(self):
+        back=FPortal(self.root)
+    def save(self):
+        global ID
+        conn=sqlite3.connect('FTMS.db')
+        crsr=conn.cursor() 
+        crsr.execute("UPDATE FARMER SET PWD = :PWD WHERE F_ID = :USER_ID",
+            {
+                'USER_ID':ID,
+                'PWD':self.txt_pass.get()
+                
+            })
+        crsr.execute("UPDATE FARMER SET LOCATION = :LOC WHERE F_ID = :USER_ID",
+            {
+                'USER_ID':ID,
+                'LOC':self.txt_location.get()
+                
+            })
+        crsr.execute("UPDATE FARMER SET CONTACT = :con WHERE F_ID = :USER_ID",
+            {
+                'USER_ID':ID,
+                'con':self.txt_contact.get()
+                
+            })
+        conn.commit()
+        conn.close()
 
     
 global root
