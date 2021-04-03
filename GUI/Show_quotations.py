@@ -56,7 +56,6 @@ obj = Register(root)
 
 root.mainloop()
 
-
 # Register - Ask if farmer/buyer
 # Farmer - USERID, PAss, name, location, contact number,  (if farmer/buyer), Which crops (checklist)
 # Buyer - USERID, PAss, name, location, contact number,  (if farmer/buyer),
