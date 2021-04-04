@@ -501,26 +501,41 @@ class Show_H:
         Frame_login=Frame(self.root, bg="white")
         Frame_login.place(x=50, y=50, height=550, width=900)
 
-        title = Label(Frame_login, text="Register on", font=("Sans Serif",20),fg="black", bg="white").place(x=170, y=30)
-        title_2 = Label(Frame_login, text="FTMS ", font=("Sans Serif",20, "bold"),fg="#fc6203", bg="white").place(x=330, y=30)
-        desc = Label(Frame_login, text="Farmers Transaction Management System ", font=("Sans Serif",10),fg="grey", bg="white").place(x=115, y=70)
+        title = Label(Frame_login, text="All Transaction", font=("Sans Serif",20),fg="black", bg="white").place(x=280, y=30)
+        title_2 = Label(Frame_login, text="History ", font=("Sans Serif",20, "bold"),fg="#fc6203", bg="white").place(x=480, y=30)
+        desc = Label(Frame_login, text="Farmers Transaction Management System ", font=("Sans Serif",10),fg="grey", bg="white").place(x=300, y=70)
         
-        self.all_quotes = Listbox(Frame_login,bg="white",fg="#fc6203", bd=0,height=14,width=100)
+        self.all_quotes = ttk.Treeview(Frame_login)
+        self.all_quotes["columns"]=("B_ID","CROP","Amount", "Timestamp")
+        self.all_quotes.column("#0", width=150, minwidth=150)
+        self.all_quotes.column("B_ID", width=120, minwidth=120)
+        self.all_quotes.column("CROP", width=120, minwidth=120)
+        self.all_quotes.column('Amount',width=120, minwidth=120)
+        self.all_quotes.column("Timestamp", width=300, minwidth=300)
         self.all_quotes.place(x=50,y = 100)
-        # self.all_quotes.pack()
 
+        self.all_quotes.heading("#0",text="TRANSACTION ID")
+        self.all_quotes.heading("B_ID", text="BUYER ID")
+        self.all_quotes.heading("CROP", text="CROP")
+        self.all_quotes.heading("Amount",text="AMOUNT")
+        self.all_quotes.heading("Timestamp", text="Timestamp")
 
-        print(type(self.all_quotes))
+        conn=sqlite3.connect('FTMS.db')
+        crsr=conn.cursor()
+        crsr.execute("SELECT * FROM TRANS WHERE F_ID=:USER_ID",
+        {
+            'USER_ID':ID
+        })
+        list=crsr.fetchall()
+        conn.commit()
+        conn.close()
         # self.all_quotes = Listbox(Frame_login)
-        my_list = [100,200,300,400,500]
 
-        for item in my_list:
-            self.all_quotes.insert(END, item)
+        for item in list:
+            self.all_quotes.insert("", 'end', text=item[0], values=(item[2],item[3],'231', item[4]))
 
-        More_Details = Button(Frame_login,text="Show Details",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0, command = self.select).place(x=70, y=400)
-        Back = Button(Frame_login,text="Back",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0,command=self.back).place(x=70, y=500)
-        self.display_label = Label(Frame_login,text='')
-        self.display_label.place(x=400, y=400)
+        Back = Button(Frame_login,text="Back",font=("Sans Serif",15),bg="#fc6203",fg="white", width=10, bd=0,command=self.back).place(x=350, y=450)
+
     def back(self):
         back=FPortal(self.root)    
     def select(self):
