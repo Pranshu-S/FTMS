@@ -380,7 +380,7 @@ class BPortal:
         title_2 = Label(Frame_login, text="PORTAL", font=("Sans Serif",20, "bold"),fg="#fc6203", bg="white").place(x=260, y=30)
         desc = Label(Frame_login, text="Farmers Transaction Management System ", font=("Sans Serif",10),fg="grey", bg="white").place(x=130, y=70) 
         Make_quotations = Button(Frame_login,text="Make Quotations",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0, width=20, command=self.make).place(x=110, y=140)
-        show_history = Button(Frame_login,text="Show History",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0, width=20).place(x=110, y=180)
+        show_history = Button(Frame_login,text="Show History",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0, width=20, command=self.show_history_b).place(x=110, y=180)
         edit_profile = Button(Frame_login,text="Edit Profile",font=("Sans Serif",15),bg="#fc6203",fg="white",width=20, bd=0, command=self.edit_b).place(x=110, y=220)
         my_quotations = Button(Frame_login,text="My Quotations",font=("Sans Serif",15),bg="#fc6203",fg="white", width=20,bd=0, command=self.my_q).place(x=110, y=260)
         Logout = Button(Frame_login,text="Logout",font=("Sans Serif",15),bg="#fc6203",fg="white", width=20,bd=0, command=self.log_out).place(x=110, y=300)
@@ -457,6 +457,10 @@ class Show_Q:
             self.all_quotes.insert("", 'end', text=item[0], values=(item[1],item[2],item[3]))
         
         Contact = Button(Frame_login,text="Contact Buyer and Generate Transaction",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0,command=self.contact).place(x=70, y=450)
+        
+        lbl_user = Label(Frame_login,text="Amount",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=70, y=400)
+        self.amount = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
+        self.amount.place(x=160,y=400, width=350, height=35)
 
         Back = Button(Frame_login,text="Back",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0,command=self.back).place(x=520, y=450)
 
@@ -542,8 +546,6 @@ class Show_H:
 
     def back(self):
         back=FPortal(self.root)    
-    def select(self):
-        self.display_label.config(text=self.all_quotes.get(ANCHOR))
 
 class Edit_F:
     global ID
@@ -738,27 +740,42 @@ class My_Q:
         Frame_login=Frame(self.root, bg="white")
         Frame_login.place(x=50, y=50, height=550, width=900)
 
-        title = Label(Frame_login, text="Register on", font=("Sans Serif",20),fg="black", bg="white").place(x=170, y=30)
-        title_2 = Label(Frame_login, text="FTMS ", font=("Sans Serif",20, "bold"),fg="#fc6203", bg="white").place(x=330, y=30)
-        desc = Label(Frame_login, text="Farmers Transaction Management System ", font=("Sans Serif",10),fg="grey", bg="white").place(x=115, y=70)
+        title = Label(Frame_login, text="My", font=("Sans Serif",20),fg="black", bg="white").place(x=270, y=30)
+        title_2 = Label(Frame_login, text="Quotations ", font=("Sans Serif",20, "bold"),fg="#fc6203", bg="white").place(x=440, y=30)
+        desc = Label(Frame_login, text="Farmers Transaction Management System ", font=("Sans Serif",10),fg="grey", bg="white").place(x=300, y=70)
         
-        self.all_quotes = Listbox(Frame_login,bg="white",fg="#fc6203", bd=0,height=14,width=100)
+        self.all_quotes = ttk.Treeview(Frame_login)
+        self.all_quotes["columns"]=("Crop","Quote", "Timestamp")
+        self.all_quotes.column("#0", width=150, minwidth=150)
+        self.all_quotes.column("Crop", width=150, minwidth=150)
+        self.all_quotes.column("Quote", width=150, minwidth=150)
+        self.all_quotes.column("Timestamp", width=340, minwidth=340)
         self.all_quotes.place(x=50,y = 100)
+
+        self.all_quotes.heading("#0",text="Buyer")
+        self.all_quotes.heading("Crop", text="Crop")
+        self.all_quotes.heading("Quote", text="Quote")
+        self.all_quotes.heading("Timestamp", text="Timestamp")
+
         # self.all_quotes.pack()
-
-
-        print(type(self.all_quotes))
+        conn=sqlite3.connect('FTMS.db')
+        crsr=conn.cursor()
+        crsr.execute("SELECT CROP_ID FROM CROP_GROWN WHERE F_ID=:USER_ID",
+        {
+            'USER_ID':ID
+        })
+        cid=crsr.fetchall()
+        crsr.execute("SELECT * FROM QUOTATIONS WHERE CROP_ID=:C_ID",
+        {
+            'C_ID':cid[0][0]
+        })
+        list=crsr.fetchall()
+        conn.commit()
+        conn.close()
         # self.all_quotes = Listbox(Frame_login)
-        my_list = [100,200,300,400,500]
 
-        for item in my_list:
-            self.all_quotes.insert(END, item)
-
-        More_Details = Button(Frame_login,text="Show Details",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0, command = self.select).place(x=70, y=400)
-        Back = Button(Frame_login,text="Back",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0).place(x=70, y=500)
-
-        self.display_label = Label(Frame_login,text='')
-        self.display_label.place(x=400, y=400)
+        for item in list:
+            self.all_quotes.insert("", 'end', text=item[0], values=(item[1],item[2],item[3]))
 
     def select(self):
         self.display_label.config(text=self.all_quotes.get(ANCHOR))
@@ -818,29 +835,43 @@ class Show_H_B:
         Frame_login=Frame(self.root, bg="white")
         Frame_login.place(x=50, y=50, height=550, width=900)
 
-        title = Label(Frame_login, text="Register on", font=("Sans Serif",20),fg="black", bg="white").place(x=170, y=30)
-        title_2 = Label(Frame_login, text="FTMS ", font=("Sans Serif",20, "bold"),fg="#fc6203", bg="white").place(x=330, y=30)
-        desc = Label(Frame_login, text="Farmers Transaction Management System ", font=("Sans Serif",10),fg="grey", bg="white").place(x=115, y=70)
+        title = Label(Frame_login, text="All Transaction", font=("Sans Serif",20),fg="black", bg="white").place(x=280, y=30)
+        title_2 = Label(Frame_login, text="History ", font=("Sans Serif",20, "bold"),fg="#fc6203", bg="white").place(x=480, y=30)
+        desc = Label(Frame_login, text="Farmers Transaction Management System ", font=("Sans Serif",10),fg="grey", bg="white").place(x=300, y=70)
         
-        self.all_quotes = Listbox(Frame_login,bg="white",fg="#fc6203", bd=0,height=14,width=100)
+        self.all_quotes = ttk.Treeview(Frame_login)
+        self.all_quotes["columns"]=("F_ID","CROP","Amount", "Timestamp")
+        self.all_quotes.column("#0", width=150, minwidth=150)
+        self.all_quotes.column("F_ID", width=120, minwidth=120)
+        self.all_quotes.column("CROP", width=120, minwidth=120)
+        self.all_quotes.column('Amount',width=120, minwidth=120)
+        self.all_quotes.column("Timestamp", width=300, minwidth=300)
         self.all_quotes.place(x=50,y = 100)
-        # self.all_quotes.pack()
 
-        print(type(self.all_quotes))
+        self.all_quotes.heading("#0",text="TRANSACTION ID")
+        self.all_quotes.heading("F_ID", text="FARMER ID")
+        self.all_quotes.heading("CROP", text="CROP")
+        self.all_quotes.heading("Amount",text="AMOUNT")
+        self.all_quotes.heading("Timestamp", text="Timestamp")
+
+        conn=sqlite3.connect('FTMS.db')
+        crsr=conn.cursor()
+        crsr.execute("SELECT * FROM TRANS WHERE F_ID=:USER_ID",
+        {
+            'USER_ID':ID
+        })
+        list=crsr.fetchall()
+        conn.commit()
+        conn.close()
         # self.all_quotes = Listbox(Frame_login)
-        my_list = [100,200,300,400,500]
 
-        for item in my_list:
-            self.all_quotes.insert(END, item)
+        for item in list:
+            self.all_quotes.insert("", 'end', text=item[0], values=(item[2],item[3],'231', item[4]))
 
-        More_Details = Button(Frame_login,text="Show Details",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0, command = self.select).place(x=70, y=400)
-        Back = Button(Frame_login,text="Back",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0).place(x=70, y=500)
+        Back = Button(Frame_login,text="Back",font=("Sans Serif",15),bg="#fc6203",fg="white", width=10, bd=0,command=self.back).place(x=350, y=450)
 
-        self.display_label = Label(Frame_login,text='')
-        self.display_label.place(x=400, y=400)
-
-    def select(self):
-        self.display_label.config(text=self.all_quotes.get(ANCHOR))
+    def back(self):
+        back = BPortal(self.root)
 
 def popupmsg(msg):
     popup = Tk()
