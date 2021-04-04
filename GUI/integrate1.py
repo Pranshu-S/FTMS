@@ -470,16 +470,16 @@ class Show_Q:
         Contact = Button(Frame_login,text="Contact Buyer and Generate Transaction",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0,command=self.contact).place(x=70, y=450)
         
         lbl_user = Label(Frame_login,text="Quantity",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=70, y=400)
-        self.quantity = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
-        self.quantity.place(x=160,y=400, width=350, height=35)
-
+        self.quantity_purchased = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
+        self.quantity_purchased.place(x=160,y=400, width=350, height=35)
         Back = Button(Frame_login,text="Back",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0,command=self.back).place(x=520, y=450)
 
     def contact(self):
         Selected = self.all_quotes.item(self.all_quotes.focus())
+
         if len(Selected['text'])==0:
             popupmsg("No Quote Selected!")
-        elif len(self.amount) ==0:
+        elif len(self.quantity_purchased.get()) ==0:
             popupmsg("ENTER AMOUNT!")
         else:
             conn=sqlite3.connect('FTMS.db')
@@ -500,11 +500,13 @@ class Show_Q:
                 'C_ID':get_crop_id(Selected['values'][0]),
                 'dt':datetime.datetime.now()
             })
+            Cost = float(self.quantity_purchased.get())*float(Selected['values'][1])
+            print(Cost)
             crsr.execute("INSERT INTO AMOUNTS VALUES(:Tr_ID,:AMT,:QT)",
             {
                 'Tr_ID':s+1,
-                'QT':int(self.quantity.get()),
-                'AMT':float(int(self.quantity.get())*float(amt[0][0]))
+                'QT':self.quantity_purchased.get(),
+                'AMT':Cost
             })
             crsr.execute("DELETE FROM QUOTATIONS WHERE B_ID=:Br_ID AND CROP_ID=:C_ID",
             {
@@ -559,20 +561,44 @@ class Show_H:
         {
             'USER_ID':ID
         })
-        list=crsr.fetchall()
-        print(list)
-        crsr.execute("SELECT AMT FROM AMOUNTS WHERE T_ID=:TID",
+        list_trans=crsr.fetchall()
+
+        crsr.execute("SELECT T_ID FROM TRANS WHERE F_ID=:USER_ID",
         {
-            'TID':int(list[0][0])
+            'USER_ID':ID
         })
-        amt=crsr.fetchall()
+        all_id = crsr.fetchall()
+
+        all_id2 = []
+
+        for ids in all_id:
+            all_id2.append(ids[0])
         
+        amt = []
+
+        for ids in all_id2:  
+            crsr.execute("SELECT AMT FROM AMOUNTS WHERE T_ID=:TID",
+            {
+                'TID':ids
+            })
+            quote_ret=crsr.fetchall()
+            amt.append(quote_ret)
+
         conn.commit()
         conn.close()
         # self.all_quotes = Listbox(Frame_login)
 
-        for item in list:
-            self.all_quotes.insert("", 'end', text=item[0], values=(item[2],item[3],amt[0][0], item[4]))
+        final_amt = []
+
+        for costs in amt:
+            final_amt.append(costs[0][0])        # final_amt.append(costs[0][1])
+
+        print(final_amt)
+
+        i = 0
+        for item in list_trans:
+            self.all_quotes.insert("", 'end', text=item[0], values=(item[2],get_crop_name(item[3]),final_amt[i], item[4]))
+            i = i + 1
 
         Back = Button(Frame_login,text="Back",font=("Sans Serif",15),bg="#fc6203",fg="white", width=10, bd=0,command=self.back).place(x=350, y=450)
 
@@ -643,10 +669,15 @@ class Edit_F:
         self.txt_contact = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0",textvariable= old_contact )
         self.txt_contact.place(x=70,y=140, width=250, height=35)
 
-        old_crop = StringVar(value=self.CROP)
         lbl_crop = Label(Frame_login,text="Change Crop",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=400, y=190)
-        self.txt_crop = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0",textvariable=old_crop)
-        self.txt_crop.place(x=400,y=220, width=250, height=35)
+        crop_list = get_crops()
+
+        self.variable = StringVar()
+        self.variable.set(get_crop_name(self.CROP))
+
+        self.crops = OptionMenu(Frame_login, self.variable, *crop_list)
+        self.crops.config(bg="#ebedf0", bd=0,width=17, font=("Sans Serif",14))
+        self.crops.place(x=400, y=220) 
 
         Save =Button(self.root, text="Save",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20),command=self.save).place(x=400, y= 500)
         Back =Button(self.root, text="Back",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20),command=self.back).place(x=640, y= 500)
@@ -656,7 +687,6 @@ class Edit_F:
     
     def save(self):
         global ID
-
         conn=sqlite3.connect('FTMS.db')
         crsr=conn.cursor() 
 
@@ -687,12 +717,15 @@ class Edit_F:
         else:
             self.popupmsg("INVALID CONTACT NUMBER!")
 
+        if self.variable.get() != 'Select':
 
-        crsr.execute("  UPDATE CROP_GROWN SET CROP_ID = :C_ID WHERE F_ID = :USER_ID",
-            {
-                'USER_ID':ID,
-                'C_ID':int(self.txt_crop.get())
-            })
+            crsr.execute("  UPDATE CROP_GROWN SET CROP_ID = :C_ID WHERE F_ID = :USER_ID",
+                {
+                    'USER_ID':ID,
+                    'C_ID':get_crop_id(self.variable.get())
+                })
+        else:
+            popupmsg("ENTER VALID CROP")
         
         conn.commit()
         conn.close()
@@ -728,9 +761,15 @@ class Make_Q:
         desc = Label(Frame_login, text="Farmers Transaction Management System ", font=("Sans Serif",10),fg="grey", bg="white").place(x=115, y=70)
 
         lbl_crop = Label(Frame_login,text="Crop",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=70, y=110)
-        self.txt_crop = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
-        self.txt_crop.place(x=70,y=140, width=350, height=35)
 
+        crop_list = get_crops()
+
+        self.variable = StringVar()
+        self.variable.set(crop_list[0])
+
+        self.crops = OptionMenu(Frame_login, self.variable, *crop_list)
+        self.crops.config(bg="#ebedf0", bd=0,width=26, font=("Sans Serif",14))
+        self.crops.place(x=70, y=140) 
 
         lbl_price = Label(Frame_login,text="Quote (Rs/kg)",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=70, y=190)
         self.txt_price = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
@@ -742,19 +781,25 @@ class Make_Q:
         back=BPortal(self.root)
     def submit(self):
         global ID
-        dt=datetime.datetime.now()
-        conn=sqlite3.connect('FTMS.db')
-        crsr=conn.cursor()
-        crsr.execute("INSERT INTO QUOTATIONS VALUES(:USER_ID,:C_ID,:AMT,:DT)",
-            {
-                'USER_ID':ID,
-                'C_ID':int(self.txt_crop.get()),
-                'AMT':self.txt_price.get(),
-                'DT':dt
-            })
-        conn.commit()
-        conn.close()
-        popupmsg("QUOTE ADDED!")
+
+        if self.variable.get() == 'Select':
+            popupmsg("SELECT CROP")
+        else:
+            self.txt_crop = get_crop_id(self.variable.get())
+            dt=datetime.datetime.now()
+            conn=sqlite3.connect('FTMS.db')
+            crsr=conn.cursor()
+            print(self.txt_crop)
+            crsr.execute("INSERT INTO QUOTATIONS VALUES(:USER_ID,:C_ID,:AMT,:DT)",
+                {
+                    'USER_ID':ID,
+                    'C_ID':self.txt_crop,
+                    'AMT':self.txt_price.get(),
+                    'DT':dt
+                })
+            conn.commit()
+            conn.close()
+            popupmsg("QUOTE ADDED!")
 
 class My_Q:
     def __init__(self,root):
