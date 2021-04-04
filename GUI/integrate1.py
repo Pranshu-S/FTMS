@@ -469,9 +469,9 @@ class Show_Q:
         
         Contact = Button(Frame_login,text="Contact Buyer and Generate Transaction",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0,command=self.contact).place(x=70, y=450)
         
-        lbl_user = Label(Frame_login,text="Amount",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=70, y=400)
-        self.amount = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
-        self.amount.place(x=160,y=400, width=350, height=35)
+        lbl_user = Label(Frame_login,text="Quantity",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=70, y=400)
+        self.quantity = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
+        self.quantity.place(x=160,y=400, width=350, height=35)
 
         Back = Button(Frame_login,text="Back",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0,command=self.back).place(x=520, y=450)
 
@@ -486,6 +486,12 @@ class Show_Q:
             crsr=conn.cursor()
             crsr.execute("SELECT * FROM TRANS")
             s=len(crsr.fetchall())
+            crsr.execute("SELECT AMT FROM QUOTATIONS WHERE B_ID=:Br_ID AND CROP_ID=:C_ID",
+            {
+                'Br_ID':Selected['text'],
+                'C_ID':Selected['values'][0]
+            })
+            amt=crsr.fetchall()
             crsr.execute("INSERT INTO TRANS VALUES(:Tr_ID,:Fr_ID,:Br_ID,:C_ID,:dt)",
             {
                 'Tr_ID':s+1,
@@ -493,6 +499,12 @@ class Show_Q:
                 'Br_ID':Selected['text'],
                 'C_ID':get_crop_id(Selected['values'][0]),
                 'dt':datetime.datetime.now()
+            })
+            crsr.execute("INSERT INTO AMOUNTS VALUES(:Tr_ID,:AMT,:QT)",
+            {
+                'Tr_ID':s+1,
+                'QT':int(self.quantity.get()),
+                'AMT':float(int(self.quantity.get())*float(amt[0][0]))
             })
             crsr.execute("DELETE FROM QUOTATIONS WHERE B_ID=:Br_ID AND CROP_ID=:C_ID",
             {
@@ -548,12 +560,19 @@ class Show_H:
             'USER_ID':ID
         })
         list=crsr.fetchall()
+        print(list)
+        crsr.execute("SELECT AMT FROM AMOUNTS WHERE T_ID=:TID",
+        {
+            'TID':int(list[0][0])
+        })
+        amt=crsr.fetchall()
+        
         conn.commit()
         conn.close()
         # self.all_quotes = Listbox(Frame_login)
 
         for item in list:
-            self.all_quotes.insert("", 'end', text=item[0], values=(item[2],item[3],'231', item[4]))
+            self.all_quotes.insert("", 'end', text=item[0], values=(item[2],item[3],amt[0][0], item[4]))
 
         Back = Button(Frame_login,text="Back",font=("Sans Serif",15),bg="#fc6203",fg="white", width=10, bd=0,command=self.back).place(x=350, y=450)
 
