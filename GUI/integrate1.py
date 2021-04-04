@@ -158,12 +158,19 @@ class Register_F:
         self.txt_name.place(x=400,y=140, width=250, height=35)
 
         lbl_crop = Label(Frame_login,text="Crop",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=400, y=190)
-        self.txt_crop = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
-        self.txt_crop.place(x=400,y=220, width=250, height=35)
-        
+        crop_list = get_crops()
+
+        self.variable = StringVar()
+        self.variable.set(crop_list[0])
+
+        self.crops = OptionMenu(Frame_login, self.variable, *crop_list)
+        self.crops.config(bg="#ebedf0", bd=0,width=17, font=("Sans Serif",14))
+        self.crops.place(x=400, y=220)     
         Next_Button =Button(self.root, text="Register",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20),command = self.submit).place(x=640, y= 460)
     
     def submit(self):
+        self.txt_crop = get_crop_id(self.variable.get())
+
         IS_AVAILABLE = 1   
         conn=sqlite3.connect('FTMS.db')
         crsr=conn.cursor()
@@ -189,23 +196,27 @@ class Register_F:
             if self.txt_pass.get() == self.txt_conf_pass.get():
 
                 if len(self.txt_contact.get())==10:
-                    crsr.execute("INSERT INTO FARMER VALUES(:USER_ID,:PWD, :NAME, :LOC ,:CONTACT)",
-                        {
-                            'USER_ID':self.txt_user.get(),
-                            'PWD':self.txt_pass.get(),
-                            'NAME':self.txt_name.get(),
-                            'LOC':self.txt_location.get(),
-                            'CONTACT':self.txt_contact.get()
-                        })
-                    crsr.execute("INSERT INTO CROP_GROWN VALUES(:USER_ID,:C_ID)",
-                        {
-                            'USER_ID':self.txt_user.get(),
-                            'C_ID':int(self.txt_crop.get())
-                        })
+                    print(self.txt_crop)
+                    if self.txt_crop != None:
+                        crsr.execute("INSERT INTO FARMER VALUES(:USER_ID,:PWD, :NAME, :LOC ,:CONTACT)",
+                            {
+                                'USER_ID':self.txt_user.get(),
+                                'PWD':self.txt_pass.get(),
+                                'NAME':self.txt_name.get(),
+                                'LOC':self.txt_location.get(),
+                                'CONTACT':self.txt_contact.get()
+                            })
+                        crsr.execute("INSERT INTO CROP_GROWN VALUES(:USER_ID,:C_ID)",
+                            {
+                                'USER_ID':self.txt_user.get(),
+                                'C_ID':int(self.txt_crop)
+                            })
 
-                    conn.commit()
-                    conn.close()
-                    login1 = Login(self.root)
+                        conn.commit()
+                        conn.close()
+                        login1 = Login(self.root)
+                    else:
+                        self.popupmsg("SELECT CROP!")
                 else:
                     self.popupmsg("ENTER VALID PHONE NUMBER!")
 
@@ -454,7 +465,7 @@ class Show_Q:
         # self.all_quotes = Listbox(Frame_login)
 
         for item in list:
-            self.all_quotes.insert("", 'end', text=item[0], values=(item[1],item[2],item[3]))
+            self.all_quotes.insert("", 'end', text=item[0], values=(get_crop_name(item[1]),item[2],item[3]))
         
         Contact = Button(Frame_login,text="Contact Buyer and Generate Transaction",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0,command=self.contact).place(x=70, y=450)
         
@@ -468,6 +479,8 @@ class Show_Q:
         Selected = self.all_quotes.item(self.all_quotes.focus())
         if len(Selected['text'])==0:
             popupmsg("No Quote Selected!")
+        elif len(self.amount) ==0:
+            popupmsg("ENTER AMOUNT!")
         else:
             conn=sqlite3.connect('FTMS.db')
             crsr=conn.cursor()
@@ -478,13 +491,13 @@ class Show_Q:
                 'Tr_ID':s+1,
                 'Fr_ID':ID,
                 'Br_ID':Selected['text'],
-                'C_ID':Selected['values'][0],
+                'C_ID':get_crop_id(Selected['values'][0]),
                 'dt':datetime.datetime.now()
             })
             crsr.execute("DELETE FROM QUOTATIONS WHERE B_ID=:Br_ID AND CROP_ID=:C_ID",
             {
                 'Br_ID':Selected['text'],
-                'C_ID':Selected['values'][0]
+                'C_ID':get_crop_id(Selected['values'][0])
             })
             conn.commit()
             conn.close()
@@ -936,6 +949,50 @@ def popupmsg(msg):
     B1 = Button(popup, text="Okay", command = popup.destroy)
     B1.pack()
     popup.mainloop() 
+
+def get_crop_id(crop_name):
+    conn=sqlite3.connect('FTMS.db')
+    crsr=conn.cursor()
+
+    crsr.execute("SELECT * FROM CROP")
+
+    list_crops =crsr.fetchall()
+
+    for crops in list_crops:
+        if crop_name == crops[1]:
+            conn.commit()
+            conn.close()
+            return crops[0]
+
+def get_crop_name(crop_id):
+    conn=sqlite3.connect('FTMS.db')
+    crsr=conn.cursor()
+
+    crsr.execute("SELECT * FROM CROP")
+
+    list_crops =crsr.fetchall()
+    
+    for crops in list_crops:
+        if crop_id == crops[0]:
+            conn.commit()
+            conn.close()
+            return crops[1]
+
+def get_crops():
+
+    conn=sqlite3.connect('FTMS.db')
+    crsr=conn.cursor()
+
+    crsr.execute("SELECT * FROM CROP")
+
+    list_crops =crsr.fetchall()
+
+    OptionList = ['Select']
+
+    for crops in list_crops:
+        OptionList.append(crops[1])
+
+    return OptionList
 
 global root
 root=Tk()
