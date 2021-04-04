@@ -689,8 +689,8 @@ class Make_Q:
         Frame_login=Frame(self.root, bg="white")
         Frame_login.place(x=450, y=100, height=340, width=500)
         
-        title = Label(Frame_login, text="Welcome to ", font=("Sans Serif",20),fg="black", bg="white").place(x=130, y=30)
-        title_2 = Label(Frame_login, text="FTMS ", font=("Sans Serif",20, "bold"),fg="#fc6203", bg="white").place(x=290, y=30)
+        title = Label(Frame_login, text="Add ", font=("Sans Serif",20),fg="black", bg="white").place(x=150, y=30)
+        title_2 = Label(Frame_login, text="Quotations ", font=("Sans Serif",20, "bold"),fg="#fc6203", bg="white").place(x=210, y=30)
         desc = Label(Frame_login, text="Farmers Transaction Management System ", font=("Sans Serif",10),fg="grey", bg="white").place(x=115, y=70)
 
         lbl_crop = Label(Frame_login,text="Crop",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=70, y=110)
@@ -720,6 +720,7 @@ class Make_Q:
             })
         conn.commit()
         conn.close()
+        popupmsg("QUOTE ADDED!")
 
 class My_Q:
     def __init__(self,root):
