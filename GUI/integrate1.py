@@ -847,7 +847,7 @@ class My_Q:
         # self.all_quotes = Listbox(Frame_login)
 
         for item in list:
-            self.all_quotes.insert("", 'end', text=item[0], values=(item[1],item[2],item[3]))
+            self.all_quotes.insert("", 'end', text=item[0], values=(get_crop_name(item[1]),item[2],item[3]))
                 
         Back = Button(Frame_login,text="Back",font=("Sans Serif",15),bg="#fc6203",fg="white", width=15, bd=0,command=self.back).place(x=300, y=450)
 
@@ -972,38 +972,69 @@ class Show_H_B:
         desc = Label(Frame_login, text="Farmers Transaction Management System ", font=("Sans Serif",10),fg="grey", bg="white").place(x=300, y=70)
         
         self.all_quotes = ttk.Treeview(Frame_login)
-        self.all_quotes["columns"]=("F_ID","CROP","Amount", "Timestamp")
+        self.all_quotes["columns"]=("B_ID","CROP","Amount", "Timestamp")
         self.all_quotes.column("#0", width=150, minwidth=150)
-        self.all_quotes.column("F_ID", width=120, minwidth=120)
+        self.all_quotes.column("B_ID", width=120, minwidth=120)
         self.all_quotes.column("CROP", width=120, minwidth=120)
         self.all_quotes.column('Amount',width=120, minwidth=120)
         self.all_quotes.column("Timestamp", width=300, minwidth=300)
         self.all_quotes.place(x=50,y = 100)
 
         self.all_quotes.heading("#0",text="TRANSACTION ID")
-        self.all_quotes.heading("F_ID", text="FARMER ID")
+        self.all_quotes.heading("B_ID", text="BUYER ID")
         self.all_quotes.heading("CROP", text="CROP")
         self.all_quotes.heading("Amount",text="AMOUNT")
         self.all_quotes.heading("Timestamp", text="Timestamp")
 
         conn=sqlite3.connect('FTMS.db')
         crsr=conn.cursor()
-        crsr.execute("SELECT * FROM TRANS WHERE F_ID=:USER_ID",
+        crsr.execute("SELECT * FROM TRANS WHERE B_ID=:USER_ID",
         {
             'USER_ID':ID
         })
-        list=crsr.fetchall()
+        list_trans=crsr.fetchall()
+
+        crsr.execute("SELECT T_ID FROM TRANS WHERE B_ID=:USER_ID",
+        {
+            'USER_ID':ID
+        })
+        all_id = crsr.fetchall()
+
+        all_id2 = []
+
+        for ids in all_id:
+            all_id2.append(ids[0])
+        
+        amt = []
+
+        for ids in all_id2:  
+            crsr.execute("SELECT AMT FROM AMOUNTS WHERE T_ID=:TID",
+            {
+                'TID':ids
+            })
+            quote_ret=crsr.fetchall()
+            amt.append(quote_ret)
+
         conn.commit()
         conn.close()
         # self.all_quotes = Listbox(Frame_login)
 
-        for item in list:
-            self.all_quotes.insert("", 'end', text=item[0], values=(item[2],item[3],'231', item[4]))
+        final_amt = []
+
+        for costs in amt:
+            final_amt.append(costs[0][0])        # final_amt.append(costs[0][1])
+
+        print(final_amt)
+
+        i = 0
+        for item in list_trans:
+            self.all_quotes.insert("", 'end', text=item[0], values=(item[1],get_crop_name(item[3]),final_amt[i], item[4]))
+            i = i + 1
 
         Back = Button(Frame_login,text="Back",font=("Sans Serif",15),bg="#fc6203",fg="white", width=10, bd=0,command=self.back).place(x=350, y=450)
 
     def back(self):
-        back = BPortal(self.root)
+        back=BPortal(self.root)    
 
 def popupmsg(msg):
     popup = Tk()
