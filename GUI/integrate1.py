@@ -415,9 +415,9 @@ class Show_Q:
         Frame_login=Frame(self.root, bg="white")
         Frame_login.place(x=50, y=50, height=550, width=900)
 
-        title = Label(Frame_login, text="Register on", font=("Sans Serif",20),fg="black", bg="white").place(x=170, y=30)
-        title_2 = Label(Frame_login, text="FTMS ", font=("Sans Serif",20, "bold"),fg="#fc6203", bg="white").place(x=330, y=30)
-        desc = Label(Frame_login, text="Farmers Transaction Management System ", font=("Sans Serif",10),fg="grey", bg="white").place(x=115, y=70)
+        title = Label(Frame_login, text="All Avialable", font=("Sans Serif",20),fg="black", bg="white").place(x=270, y=30)
+        title_2 = Label(Frame_login, text="Quotations ", font=("Sans Serif",20, "bold"),fg="#fc6203", bg="white").place(x=440, y=30)
+        desc = Label(Frame_login, text="Farmers Transaction Management System ", font=("Sans Serif",10),fg="grey", bg="white").place(x=300, y=70)
         
         self.all_quotes = ttk.Treeview(Frame_login)
         self.all_quotes["columns"]=("Crop","Quote", "Timestamp")
@@ -426,7 +426,6 @@ class Show_Q:
         self.all_quotes.column("Quote", width=150, minwidth=150)
         self.all_quotes.column("Timestamp", width=340, minwidth=340)
         self.all_quotes.place(x=50,y = 100)
-
 
         self.all_quotes.heading("#0",text="Buyer")
         self.all_quotes.heading("Crop", text="Crop")
@@ -453,37 +452,35 @@ class Show_Q:
         for item in list:
             self.all_quotes.insert("", 'end', text=item[0], values=(item[1],item[2],item[3]))
         
-        Contact = Button(Frame_login,text="Select Quote",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0,command=self.contact).place(x=70, y=450)
+        Contact = Button(Frame_login,text="Contact Buyer and Generate Transaction",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0,command=self.contact).place(x=70, y=450)
 
-        Back = Button(Frame_login,text="Back",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0,command=self.back).place(x=70, y=500)
-        
-        self.display_label = Label(Frame_login,text='')
-        self.display_label.place(x=400, y=400)
+        Back = Button(Frame_login,text="Back",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0,command=self.back).place(x=520, y=450)
 
-        
     def contact(self):
         Selected = self.all_quotes.item(self.all_quotes.focus())
-
-        conn=sqlite3.connect('FTMS.db')
-        crsr=conn.cursor()
-        crsr.execute("SELECT * FROM TRANS")
-        s=len(crsr.fetchall())
-        crsr.execute("INSERT INTO TRANS VALUES(:Tr_ID,:Fr_ID,:Br_ID,:C_ID,:dt)",
-        {
-            'Tr_ID':s+1,
-            'Fr_ID':ID,
-            'Br_ID':Selected['text'],
-            'C_ID':Selected['values'][0],
-            'dt':datetime.datetime.now()
-        })
-        crsr.execute("DELETE FROM QUOTATIONS WHERE B_ID=:Br_ID AND CROP_ID=:C_ID",
-        {
-            'Br_ID':Selected['text'],
-            'C_ID':Selected['values'][0]
-        })
-        conn.commit()
-        conn.close()
-        refresh = Show_Q(self.root)
+        if len(Selected['text'])==0:
+            popupmsg("No Quote Selected!")
+        else:
+            conn=sqlite3.connect('FTMS.db')
+            crsr=conn.cursor()
+            crsr.execute("SELECT * FROM TRANS")
+            s=len(crsr.fetchall())
+            crsr.execute("INSERT INTO TRANS VALUES(:Tr_ID,:Fr_ID,:Br_ID,:C_ID,:dt)",
+            {
+                'Tr_ID':s+1,
+                'Fr_ID':ID,
+                'Br_ID':Selected['text'],
+                'C_ID':Selected['values'][0],
+                'dt':datetime.datetime.now()
+            })
+            crsr.execute("DELETE FROM QUOTATIONS WHERE B_ID=:Br_ID AND CROP_ID=:C_ID",
+            {
+                'Br_ID':Selected['text'],
+                'C_ID':Selected['values'][0]
+            })
+            conn.commit()
+            conn.close()
+            refresh = Show_Q(self.root)
 
     def back(self):
         back=FPortal(self.root)
@@ -824,6 +821,15 @@ class Show_H_B:
 
     def select(self):
         self.display_label.config(text=self.all_quotes.get(ANCHOR))
+
+def popupmsg(msg):
+    popup = Tk()
+    popup.wm_title("!")
+    label = Label(popup, text=msg)
+    label.pack(side="top", fill="x", pady=10)
+    B1 = Button(popup, text="Okay", command = popup.destroy)
+    B1.pack()
+    popup.mainloop() 
 
 global root
 root=Tk()
