@@ -740,8 +740,8 @@ class My_Q:
         Frame_login=Frame(self.root, bg="white")
         Frame_login.place(x=50, y=50, height=550, width=900)
 
-        title = Label(Frame_login, text="My", font=("Sans Serif",20),fg="black", bg="white").place(x=270, y=30)
-        title_2 = Label(Frame_login, text="Quotations ", font=("Sans Serif",20, "bold"),fg="#fc6203", bg="white").place(x=440, y=30)
+        title = Label(Frame_login, text="My", font=("Sans Serif",20),fg="black", bg="white").place(x=350, y=30)
+        title_2 = Label(Frame_login, text="Quotations ", font=("Sans Serif",20, "bold"),fg="#fc6203", bg="white").place(x=400, y=30)
         desc = Label(Frame_login, text="Farmers Transaction Management System ", font=("Sans Serif",10),fg="grey", bg="white").place(x=300, y=70)
         
         self.all_quotes = ttk.Treeview(Frame_login)
@@ -760,14 +760,9 @@ class My_Q:
         # self.all_quotes.pack()
         conn=sqlite3.connect('FTMS.db')
         crsr=conn.cursor()
-        crsr.execute("SELECT CROP_ID FROM CROP_GROWN WHERE F_ID=:USER_ID",
+        crsr.execute("SELECT * FROM QUOTATIONS WHERE B_ID=:USER_ID",
         {
             'USER_ID':ID
-        })
-        cid=crsr.fetchall()
-        crsr.execute("SELECT * FROM QUOTATIONS WHERE CROP_ID=:C_ID",
-        {
-            'C_ID':cid[0][0]
         })
         list=crsr.fetchall()
         conn.commit()
@@ -776,14 +771,31 @@ class My_Q:
 
         for item in list:
             self.all_quotes.insert("", 'end', text=item[0], values=(item[1],item[2],item[3]))
+                
+        Back = Button(Frame_login,text="Back",font=("Sans Serif",15),bg="#fc6203",fg="white", width=15, bd=0,command=self.back).place(x=300, y=450)
 
-    def select(self):
-        self.display_label.config(text=self.all_quotes.get(ANCHOR))
+    def back(self):
+        goback = BPortal(self.root)
 
 class Edit_B:
     def __init__(self,root):
+        conn=sqlite3.connect('FTMS.db')
+        crsr=conn.cursor() 
+        crsr.execute("SELECT * FROM BUYER WHERE B_ID = :USER_ID",
+            {
+                'USER_ID':ID               
+            })
+        details = crsr.fetchall()
+
+        self.PWD = details[0][1]
+        self.LOCATION = details[0][3]
+        self.CONTACT = details[0][4] 
+
+        conn.commit()
+        conn.close()
+
         self.root = root
-        self.root.title("Register User")
+        self.root.title("Edit Buyer Profile")
         self.root.geometry("1024x640")
         self.root.resizable(False,False)
         
@@ -798,26 +810,69 @@ class Edit_B:
         title = Label(Frame_login, text="Register on", font=("Sans Serif",20),fg="black", bg="white").place(x=170, y=30)
         title_2 = Label(Frame_login, text="FTMS ", font=("Sans Serif",20, "bold"),fg="#fc6203", bg="white").place(x=330, y=30)
         desc = Label(Frame_login, text="Farmers Transaction Management System ", font=("Sans Serif",10),fg="grey", bg="white").place(x=115, y=70)
-        
 
+        old_pass = StringVar(value=self.PWD)
         lbl_pass = Label(Frame_login,text="Change Password",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=70, y=190)
-        self.txt_pass = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
+        self.txt_pass = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0", show="*", textvariable=old_pass)
         self.txt_pass.place(x=70,y=220, width=250, height=35)
 
+        old_pass1 = StringVar(value=self.PWD)
         conf_lbl_pass = Label(Frame_login,text="Confirm Change Password",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=400, y=190)
-        self.txt_conf_pass = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
+        self.txt_conf_pass = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0",show="*", textvariable=old_pass1)
         self.txt_conf_pass.place(x=400,y=220, width=250, height=35)
 
-        lbl_location = Label(Frame_login,text="Change Location",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=400, y=110)
-        self.txt_location = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
+        old_location = StringVar(value=self.LOCATION)
+        lbl_location = Label(Frame_login,text="Change Location", font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=400, y=110)
+        self.txt_location = Entry(Frame_login, font=("Sans Serif",10), textvariable = old_location,bg="#ebedf0")
         self.txt_location.place(x=400,y=140, width=250, height=35)
 
+        old_contact = StringVar(value=self.CONTACT)
         lbl_contact = Label(Frame_login,text="Change Contact Number",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=70, y=110)
-        self.txt_contact = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0")
+        self.txt_contact = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0",textvariable= old_contact )
         self.txt_contact.place(x=70,y=140, width=250, height=35)
 
-        Save =Button(self.root, text="Save",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20)).place(x=640, y= 420)
-        Back =Button(self.root, text="Back",bg="#fc6203",fg="white", bd=0, font=("Sans Serif",20)).place(x=640, y= 500)
+        Save =Button(self.root, text="Save",bg="#fc6203",fg="white", bd=0, width=15, command=self.save_details, font=("Sans Serif",15)).place(x=400, y= 420)
+        Back =Button(self.root, text="Back",bg="#fc6203",fg="white", bd=0, width=15, command=self.goback, font=("Sans Serif",15)).place(x=400, y= 460)
+    
+    def save_details(self):
+        global ID
+
+        conn=sqlite3.connect('FTMS.db')
+        crsr=conn.cursor() 
+
+        if self.txt_conf_pass.get() == self.txt_pass.get():
+            crsr.execute("UPDATE BUYER SET PWD = :PWD WHERE B_ID = :USER_ID",
+                {
+                    'USER_ID':ID,
+                    'PWD':self.txt_pass.get()
+                })
+        else:
+            popupmsg("PASSWORDS DO NOT MATCH!")
+
+
+        crsr.execute("UPDATE BUYER SET LOCATION = :LOC WHERE B_ID = :USER_ID",
+            {
+                'USER_ID':ID,
+                'LOC':self.txt_location.get()
+                
+            })
+        
+        if len(self.txt_contact.get())==10:
+            crsr.execute("UPDATE BUYER SET CONTACT = :con WHERE B_ID = :USER_ID",
+                {
+                    'USER_ID':ID,
+                    'con':self.txt_contact.get()
+                    
+                })
+        else:
+            popupmsg("INVALID CONTACT NUMBER!")
+        
+        conn.commit()
+        conn.close()
+        back=BPortal(self.root)
+
+    def goback(self):
+        back =BPortal(self.root)
 
 class Show_H_B:
     def __init__(self,root):
