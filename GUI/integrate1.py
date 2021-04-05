@@ -455,18 +455,21 @@ class Show_Q:
             'USER_ID':ID
         })
         cid=crsr.fetchall()
-        crsr.execute("SELECT * FROM QUOTATIONS WHERE CROP_ID=:C_ID",
-        {
-            'C_ID':cid[0][0]
-        })
-        list=crsr.fetchall()
-        conn.commit()
-        conn.close()
+
+        for crops in cid:
+            crsr.execute("SELECT * FROM QUOTATIONS WHERE CROP_ID=:C_ID",
+            {
+                'C_ID':crops[0]
+            })
+            list=crsr.fetchall()
+
         # self.all_quotes = Listbox(Frame_login)
 
-        for item in list:
-            self.all_quotes.insert("", 'end', text=item[0], values=(get_crop_name(item[1]),item[2],item[3]))
-        
+            for item in list:
+                self.all_quotes.insert("", 'end', text=item[0], values=(get_crop_name(item[1]),item[2],item[3]))
+                
+        conn.commit()
+        conn.close()
         Contact = Button(Frame_login,text="Contact Buyer and Generate Transaction",font=("Sans Serif",15),bg="#fc6203",fg="white", bd=0,command=self.contact).place(x=70, y=450)
         
         lbl_user = Label(Frame_login,text="Quantity",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=70, y=400)
@@ -627,9 +630,6 @@ class Edit_F:
             })
         details = crsr.fetchall()   
 
-        conn.commit()
-        conn.close()
-
         self.CROP = details[0][1]
 
         self.root = root
@@ -669,11 +669,28 @@ class Edit_F:
         self.txt_contact = Entry(Frame_login, font=("Sans Serif",10),bg="#ebedf0",textvariable= old_contact )
         self.txt_contact.place(x=70,y=140, width=250, height=35)
 
-        lbl_crop = Label(Frame_login,text="Change Crop",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=400, y=190)
+        lbl_crop = Label(Frame_login,text="Add Crop",font=("Sans Serif",15),fg="#fc6203", bg="white").place(x=400, y=190)
         crop_list = get_crops()
 
+        crsr.execute("SELECT CROP_ID FROM CROP_GROWN WHERE F_ID=:USER_ID",
+        {
+            'USER_ID':ID
+        })
+        cid=crsr.fetchall()
+
+        conn.commit()
+        conn.close()
+
+        avail_crops = []
+
+        for crops in cid:
+            avail_crops.append(crops[0])
+
+        for crops in avail_crops:
+            crop_list.remove(get_crop_name(crops))
+
         self.variable = StringVar()
-        self.variable.set(get_crop_name(self.CROP))
+        self.variable.set(crop_list[0])
 
         self.crops = OptionMenu(Frame_login, self.variable, *crop_list)
         self.crops.config(bg="#ebedf0", bd=0,width=17, font=("Sans Serif",14))
@@ -719,10 +736,10 @@ class Edit_F:
 
         if self.variable.get() != 'Select':
 
-            crsr.execute("  UPDATE CROP_GROWN SET CROP_ID = :C_ID WHERE F_ID = :USER_ID",
+            crsr.execute("INSERT INTO CROP_GROWN VALUES(:F_ID,:CROP_ID)",
                 {
-                    'USER_ID':ID,
-                    'C_ID':get_crop_id(self.variable.get())
+                    'F_ID':ID,
+                    'CROP_ID':get_crop_id(self.variable.get())
                 })
         else:
             popupmsg("ENTER VALID CROP")
@@ -1093,5 +1110,3 @@ global root
 root=Tk()
 obj = Login(root)
 root.mainloop()
-
-
