@@ -7,8 +7,11 @@ from tkinter import ttk
 
 conn=sqlite3.connect('FTMS.db')
 crsr=conn.cursor()
+tables = ['FARMER', 'CROP_GROWN', 'BUYER', 'QUOTATIONS', 'TRANS', 'AMOUNTS']
+# crsr.execute("DELETE FROM AMOUNTS")
 
-crsr.execute("DELETE FROM QUOTATIONS WHERE B_ID = 'Buyer_1' AND CROP_ID = 2")
+for items in tables:
+    crsr.execute("DELETE FROM "+ items)
 
 conn.commit()
 conn.close()
